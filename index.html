@@ -275,13 +275,6 @@
             padding: 12px; border-radius: 16px; margin-top: 8px;
         }
     </style>
-
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json?v=1777322173953">
-    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 
@@ -513,6 +506,34 @@
     </nav>
 </div>
 
+<div id="modal-scan" class="modal-overlay">
+    <div class="modal-card">
+        <div class="bg-teal-600 p-6 text-white text-center">
+            <h3 class="font-black uppercase tracking-widest text-sm">Scan QR Presensi</h3>
+            <p class="text-[9px] opacity-80 mt-1 uppercase">Arahkan kamera ke kode QR di ruangan</p>
+        </div>
+        <div class="p-6">
+            <div id="reader" class="overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800" style="width:100%;"></div>
+            <button onclick="closeScan()" class="w-full mt-6 p-4 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-500 font-black text-[10px] uppercase tracking-widest">Batalkan</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-dev" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <div class="p-10 text-center">
+            <div class="w-20 h-20 bg-teal-50 dark:bg-teal-900/30 text-teal-600 rounded-[30px] flex items-center justify-center text-3xl mx-auto mb-6">🛠️</div>
+            <h3 class="font-black text-slate-800 dark:text-slate-100 uppercase text-xs tracking-widest">Informasi Sistem</h3>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-4 leading-relaxed font-bold uppercase">
+                Developed by: Adi.P - it.barokah.net<br>
+                UPTD Puskesmas Sampanahan<br>
+                Versi 2.2.5 (Stable)
+            </p>
+            <button onclick="document.getElementById('modal-dev').style.display='none'" class="mt-8 text-teal-600 font-black text-[9px] uppercase tracking-[0.2em]">Tutup</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9H0-WEyNc50HcHMR6ErIWJ0-dB-Voyrq_vERJmQwIF0_dcjYHBr1cKHMlh-f1-SJp/exec";
     const MONTH_NAMES = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -522,7 +543,7 @@
     const savedCache = localStorage.getItem(CACHE_KEY);
     let state = {
         user: localStorage.getItem('bidan_user') || null,
-        data: savedCache ? JSON.parse(savedCache) : { officers: [], logs: [], schedule: {}, config: { qrData: "SISTEM-PRO-01", gpsLock: true, lat: -2.6789, lng: 116.1234, radius: 100 }, swaps: [] },
+        data: savedCache ? JSON.parse(savedCache) : { officers: [], logs: [], schedule: {}, config: { qrData: "UGD-PUSKESMAS-SCAN", gpsLock: true, lat: -2.637022, lng: 116.203674, radius: 100 }, swaps: [] },
         scanner: null,
         isWithinRadius: true, 
         userDistance: 0,
@@ -589,15 +610,6 @@
             showAlert("Gagal", "Gagal mengirim pengajuan.", "error");
         } finally {
             showLoading(false);
-        }
-    }
-
-    function checkShiftReminder() {
-        if (!state.user) return;
-        const hr = new Date().getHours();
-        const min = new Date().getMinutes();
-        if (min === 45 && [7, 13, 19].includes(hr)) {
-            console.log("Shift Reminder Check...");
         }
     }
 
@@ -687,14 +699,19 @@
 
     function updateGPS() {
         const indicator = document.getElementById('gps-indicator');
-        const cfg = state.data.config || {};
-        if (cfg.gpsLock === true) {
+        // Override koordinat secara manual sesuai instruksi
+        const targetLat = -2.637022;
+        const targetLng = 116.203674;
+        const radius = state.data.config ? state.data.config.radius : 100;
+        const lock = state.data.config ? state.data.config.gpsLock : true;
+
+        if (lock === true) {
             indicator.classList.remove('hidden');
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition((pos) => {
-                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, parseFloat(cfg.lat), parseFloat(cfg.lng));
+                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, targetLat, targetLng);
                 state.userDistance = dist;
-                state.isWithinRadius = dist <= parseInt(cfg.radius);
+                state.isWithinRadius = dist <= parseInt(radius);
                 updateGPSUI(state.isWithinRadius ? "OK" : "OUT", state.isWithinRadius ? "Dalam Radius" : `${Math.round(dist)}m Diluar`);
             }, null, { enableHighAccuracy: true });
         } else { state.isWithinRadius = true; indicator.classList.add('hidden'); }
@@ -785,13 +802,9 @@
         document.getElementById('section-schedule').classList.toggle('hidden', !state.user);
         document.getElementById('section-actual').classList.toggle('hidden', !state.user);
         
-        // Form Tukar Shift (hidden logic tetap jalan tapi display none di CSS)
-        document.getElementById('section-swap').classList.toggle('hidden', !state.user);
-
         const select = document.getElementById('select-user');
         const swapSelect = document.getElementById('swap-with-who');
 
-        // BUG FIX: Saring daftar rekan (Kecuali Diri Sendiri) untuk Tukar Shift
         if (swapSelect && state.user) {
             const colleagues = state.data.officers.filter(o => o !== state.user);
             swapSelect.innerHTML = colleagues.length === 0 ? '<option value="">(Tidak ada rekan)</option>' : 
@@ -799,7 +812,7 @@
         }
 
         if (document.activeElement !== select) {
-            select.innerHTML = state.data.officers.length === 0 ? '<option value="">(Memuat...)</option>' : 
+            select.innerHTML = state.data.officers.length === 0 ? '<option value="">-- Memuat --</option>' : 
                 '<option value="">-- Pilih Nama --</option>' + state.data.officers.map(o => `<option value="${o}" ${state.user === o ? 'selected' : ''}>${o}</option>`).join('');
         }
         
@@ -833,7 +846,7 @@
                     <span class="text-[7px] px-2 py-1 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-black uppercase">Pending</span>
                 </div>
             </div>
-        `).join('') : '<p class="text-center py-4 text-[9px] text-slate-400 italic">Belum ada pengajuan tukar shift</p>';
+        `).join('') : '<p class="text-center py-4 text-[9px] text-slate-400 italic">Belum ada pengajuan</p>';
 
         const sortedLogs = (state.data.logs || []).filter(l => l.date === logicalDateStr).reverse();
         document.getElementById('actual-list').innerHTML = sortedLogs.length ? sortedLogs.map(l => {
@@ -937,33 +950,7 @@
         XLSX.writeFile(wb, `Rekap_Bidan_${MONTH_NAMES[now.getMonth()]}_${now.getFullYear()}.xlsx`);
     }
 
-    window.onload = () => { applyDarkMode(); renderAll(); fetchData(); processQueue(); setInterval(() => renderAll(), 1000); setInterval(() => updateGPS(), 15000); setInterval(() => fetchData(true), 60000); setInterval(() => checkShiftReminder(), 60000); };
+    window.onload = () => { applyDarkMode(); renderAll(); fetchData(); processQueue(); setInterval(() => renderAll(), 1000); setInterval(() => updateGPS(), 15000); setInterval(() => fetchData(true), 60000); };
 </script>
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=1777322173953').then(reg => {
-            console.log('PWA: ServiceWorker Registered');
-            
-            reg.onupdatefound = () => {
-              const installingWorker = reg.installing;
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  window.location.reload();
-                }
-              };
-            };
-          });
-        });
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (refreshing) return;
-          refreshing = true;
-          window.location.reload();
-        });
-      }
-    </script>
 </body>
 </html>
-
