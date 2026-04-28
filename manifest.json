@@ -1,15 +1,29 @@
 {
-  "name": "SABINA",
+  "name": "SABINA - Sistem Absensi Bidan Sampanahan",
   "short_name": "SABINA",
-  "start_url": "index.html",
+  "description": "Sistem Presensi Digital UPTD Puskesmas Sampanahan",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d9488",
   "icons": [
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "medical",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Rekap Bulanan",
+      "url": "./index.html#view-rekap",
+      "icons": [{ "src": "icon-512.png", "sizes": "512x512" }]
     }
   ]
 }
