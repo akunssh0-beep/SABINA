@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sistem Presensi Bidan - Puskesmas Sampanahan</title>
+    <title>SABINA - Sistem Presensi Bidan</title>
     
-    <meta name="theme-color" content="#0d9488">
+    <meta name="theme-color" content="#db2777">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,12 +18,12 @@
     
     <style>
         :root {
-            --primary: #0d9488;
-            --primary-dark: #0f766e;
-            --primary-light: #f0fdfa;
+            --primary: #db2777;
+            --primary-dark: #be185d;
+            --primary-light: #fdf2f8;
             --accent: #f43f5e;
             --bg: #f8fafc;
-            --user-highlight: #f0fdfa;
+            --user-highlight: #fdf2f8;
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-mute: #64748b;
@@ -36,8 +36,8 @@
             --text-main: #f1f5f9;
             --text-mute: #94a3b8;
             --border-color: #334155;
-            --user-highlight: #134e4a;
-            --primary-light: #134e4a;
+            --user-highlight: #4c0519;
+            --primary-light: #831843;
         }
 
         * { 
@@ -85,13 +85,23 @@
             to { opacity: 1; transform: translateY(0); } 
         }
 
-        #view-rekap { width: 100%; padding: 0; }
+        /* Pink Modern Animated Header */
+        .pink-header {
+            background: linear-gradient(-45deg, #f472b6, #db2777, #ec4899, #be185d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .rekap-wrapper { 
             width: 100%; 
             overflow-x: auto; 
-            border-radius: 0; 
             background: var(--card-bg); 
-            border: none;
             position: relative;
             flex: 1;
         }
@@ -124,38 +134,19 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
         }
 
-        .dark .sticky-col { box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
-
-        .editor-table th.sticky-col { z-index: 40; background: var(--bg) !important; }
-
         .sticky-col-right {
             position: sticky; right: 0; background: var(--primary-light) !important; z-index: 30;
             min-width: 60px; border-left: 3px double var(--primary) !important;
             font-weight: 800; color: var(--primary);
-            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
         }
 
         .my-row { background-color: var(--user-highlight) !important; }
-        .cell-P { background-color: #ccfbf1 !important; color: #0d9488 !important; }
-        .cell-S { background-color: #fef3c7 !important; color: #d97706 !important; }
-        .cell-M { background-color: #dbeafe !important; color: #2563eb !important; }
+        .cell-P { background-color: #fdf2f8 !important; color: #db2777 !important; }
+        .cell-S { background-color: #fff1f2 !important; color: #e11d48 !important; }
+        .cell-M { background-color: #f5f3ff !important; color: #7c3aed !important; }
         
-        .dark .cell-P { background-color: #134e4a !important; color: #5eead4 !important; }
-        .dark .cell-S { background-color: #78350f !important; color: #fcd34d !important; }
-        .dark .cell-M { background-color: #1e3a8a !important; color: #93c5fd !important; }
-
         .today-col { background-color: var(--bg); border-left: 1px dashed var(--primary) !important; border-right: 1px dashed var(--primary) !important; }
         .sunday-col { background-color: #fef2f2 !important; color: #ef4444 !important; }
-        .dark .sunday-col { background-color: #450a0a !important; color: #f87171 !important; }
-
-        .highlight-row .sticky-col {
-            background-color: #f0fdf4 !important;
-            color: #166534 !important;
-            animation: pulse-green 2s infinite;
-        }
-        .dark .highlight-row .sticky-col { background-color: #064e3b !important; color: #6ee7b7 !important; }
-
-        @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         .dashboard-nav {
             position: absolute; bottom: 0; left: 0; right: 0;
@@ -176,7 +167,7 @@
             background: var(--primary); color: white;
             padding: 16px; border-radius: 18px; font-weight: 800;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.2s; box-shadow: 0 10px 20px rgba(13, 148, 136, 0.2);
+            transition: 0.2s; box-shadow: 0 10px 20px rgba(219, 39, 119, 0.2);
             width: 100%; border: none; cursor: pointer;
         }
 
@@ -205,30 +196,9 @@
             animation: pulse-green 2s infinite;
         }
 
-        .filter-grid {
-            display: grid; grid-template-columns: 1fr auto; gap: 8px;
-            margin-bottom: 12px; padding: 0 16px;
-        }
-        .search-container { position: relative; }
-        .search-input {
-            width: 100%; background: var(--bg); border: 2px solid var(--border-color);
-            padding: 12px 12px 12px 40px; border-radius: 16px;
-            font-size: 11px; font-weight: 700; color: var(--text-main); outline: none;
-        }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-mute); }
-        
-        .shift-filter {
-            background: var(--bg); border: 2px solid var(--border-color);
-            padding: 0 12px; border-radius: 16px; font-size: 11px;
-            font-weight: 800; color: var(--text-mute); appearance: none;
-        }
-        
-        .shift-card { background: var(--bg); border: 1px solid var(--border-color); transition: all 0.3s ease; transform-origin: top; border-radius: 20px;}
-        .shift-card.inactive { opacity: 0.6; transform: scale(0.98); filter: grayscale(0.5); }
-
         .profile-header {
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-            padding: 60px 24px 80px; border-radius: 0 0 40px 40px;
+            padding: 40px 24px 60px;
+            border-radius: 0 0 40px 40px;
             text-align: center; color: white; position: relative;
         }
         .profile-avatar {
@@ -236,8 +206,20 @@
             margin: 0 auto 16px; display: flex; align-items: center;
             justify-content: center; font-size: 40px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.1); border: 4px solid rgba(255,255,255,0.2);
+            position: relative;
         }
-        .dark .profile-avatar { background: #334155; }
+
+        .shift-indicator-badge {
+            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);
+            white-space: nowrap; animation: bounceIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.5); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
 
         .stats-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
@@ -253,35 +235,16 @@
             position: fixed; top: 12px; right: 12px; z-index: 4000;
             background: #ef4444; color: white; font-size: 8px; font-weight: 900;
             padding: 4px 10px; border-radius: 10px; display: none;
-            animation: slideInRight 0.3s ease;
         }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
         #lottie-overlay {
             position: fixed; inset: 0; z-index: 5000; background: rgba(255,255,255,0.9);
             display: none; align-items: center; justify-content: center; flex-direction: column;
         }
-        .dark #lottie-overlay { background: rgba(15, 23, 42, 0.9); }
-
-        #section-swap { display: none !important; }
-        
-        .swap-card {
-            background: #fffbeb; border: 1px solid #fde68a;
-            border-radius: 24px; padding: 20px;
-        }
-        .dark .swap-card { background: #451a03; border-color: #92400e; }
-        .swap-item {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            padding: 12px; border-radius: 16px; margin-top: 8px;
-        }
     </style>
 
     <link rel="manifest" href="manifest.json?v=1777431249261">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <style>
-        #offline-banner { position:fixed; top:0; left:0; right:0; background:#ef4444; color:white; text-align:center; padding:5px; z-index:9999; font-weight:bold; display:none; }
-    </style>
-    <div id="offline-banner">MODE OFFLINE - DATA TERSIMPAN LOKAL</div>
 </head>
 <body>
 
@@ -289,11 +252,11 @@
 
 <div id="lottie-overlay">
     <dotlottie-player id="success-lottie" src="https://lottie.host/7e6c4664-9694-4d89-9e0c-5f728c467a9d/UqGzGqXJ1Y.json" background="transparent" speed="1" style="width: 250px; height: 250px;" loop autoplay></dotlottie-player>
-    <h2 class="text-teal-600 dark:text-teal-400 font-black text-lg uppercase tracking-widest -mt-10">Presensi Berhasil!</h2>
+    <h2 class="text-pink-600 font-black text-lg uppercase tracking-widest -mt-10">Presensi Berhasil!</h2>
 </div>
 
 <div id="custom-alert">
-    <div id="alert-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-teal-50 text-teal-600 dark:bg-teal-900/30">📌</div>
+    <div id="alert-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-xl bg-pink-50 text-pink-600">📌</div>
     <div class="flex-1">
         <p id="alert-title" class="text-[10px] font-black uppercase text-slate-800 dark:text-slate-100 tracking-tight">Sukses</p>
         <p id="alert-msg" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 leading-tight"></p>
@@ -301,20 +264,21 @@
 </div>
 
 <div id="loading-overlay" class="hidden fixed inset-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md z-[3000] flex flex-col items-center justify-center">
-    <div class="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-800 dark:text-teal-400">Sinkronisasi Data...</p>
+    <div class="w-12 h-12 border-4 border-pink-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-pink-800 dark:text-pink-400">Sinkronisasi Data...</p>
 </div>
 
 <div class="app-container">
     <div class="scrollable-content" id="main-scroll">
         
         <div id="view-home" class="view-content active">
-            <div class="bg-teal-600 p-6 pt-12 pb-14 rounded-b-[45px] text-white relative shadow-xl overflow-hidden" style="background: linear-gradient(135deg, #0d9488 0%, #064e3b 100%);">
+            <div class="pink-header p-6 pt-10 pb-16 rounded-b-[45px] text-white relative shadow-xl overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 <div class="flex justify-between items-start relative z-10">
                     <div>
                         <p class="text-[9px] font-black opacity-70 uppercase tracking-[0.3em] mb-1">UPTD Puskesmas Sampanahan</p>
-                        <h2 id="display-name" class="text-2xl font-extrabold tracking-tight">Halo, Rekan Bidan</h2>
+                        <h2 class="text-3xl font-black tracking-tighter leading-none">SABINA</h2>
+                        <p class="text-[8px] font-bold opacity-80 uppercase tracking-widest mt-1 animate-pulse">Sistem Absen Bidan Sampanahan</p>
                     </div>
                     <div class="text-right">
                         <h1 id="clock" class="text-2xl font-black tabular-nums leading-none">00:00</h1>
@@ -327,10 +291,6 @@
                         <span id="shift-icon" class="text-lg">☀️</span>
                         <span id="shift-label" class="text-[10px] font-black uppercase tracking-wider">Shift Pagi</span>
                     </div>
-                    <div id="gps-indicator" onclick="updateGPS()" class="hidden bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 flex items-center gap-2 transition-all cursor-pointer">
-                        <span id="gps-icon" class="text-xs">📍</span>
-                        <span id="gps-label" class="text-[9px] font-black uppercase tracking-wider">GPS: Off</span>
-                    </div>
                     <button onclick="toggleDarkMode()" class="bg-white/10 p-2.5 rounded-xl border border-white/10 hover:bg-white/20 transition-all ml-auto">
                         <span id="dark-icon" class="text-lg">🌙</span>
                     </button>
@@ -340,65 +300,37 @@
                 </div>
             </div>
 
-            <div class="px-5 -mt-6 space-y-6 pb-10">
+            <div class="px-5 -mt-8 space-y-6 pb-10"> 
                 <div id="card-login" class="bg-white dark:bg-slate-800 rounded-[35px] p-10 shadow-2xl border border-slate-50 dark:border-slate-700 text-center relative z-20">
-                    <div class="w-20 h-20 bg-teal-50 dark:bg-teal-900/30 text-teal-600 rounded-[30px] flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">👩‍⚕️</div>
+                    <div class="w-20 h-20 bg-pink-50 dark:bg-pink-900/30 text-pink-600 rounded-[30px] flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">👩‍⚕️</div>
                     <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-base mb-1 uppercase tracking-tighter">Login Bidan</h3>
-                    <p class="text-slate-400 text-[10px] mb-8 font-bold uppercase tracking-widest">Silahkan Pilih Identitas Anda</p>
                     <div class="space-y-5">
-                        <div class="relative">
-                            <select id="select-user" class="w-full bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 p-4 rounded-2xl text-sm font-bold outline-none text-center appearance-none dark:text-white shadow-sm"></select>
-                        </div>
+                        <select id="select-user" class="w-full bg-slate-50 dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 p-4 rounded-2xl text-sm font-bold outline-none appearance-none dark:text-white shadow-sm"></select>
                         <button onclick="loginUser()" class="btn-primary text-xs uppercase tracking-[0.2em] w-full shadow-lg">Mulai Bekerja</button>
                     </div>
                 </div>
 
-                <div id="section-swap" class="space-y-4">
-                    <div class="swap-card shadow-sm overflow-hidden">
-                        <h3 class="font-black text-amber-700 dark:text-amber-400 text-[10px] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                            <span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>
-                            Ajukan Tukar Shift
-                        </h3>
-                        <div class="space-y-3">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[8px] font-black text-amber-600 uppercase mb-1 block">Shift Saya</label>
-                                    <input type="date" id="swap-my-date" class="w-full bg-white dark:bg-slate-700 border border-amber-200 dark:border-amber-900 p-3 rounded-xl text-[10px] font-bold outline-none dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="text-[8px] font-black text-amber-600 uppercase mb-1 block">Ajak Rekan</label>
-                                    <select id="swap-with-who" class="w-full bg-white dark:bg-slate-700 border border-amber-200 dark:border-amber-900 p-3 rounded-xl text-[10px] font-bold outline-none dark:text-white">
-                                    </select>
-                                </div>
-                            </div>
-                            <button onclick="submitSwapRequest()" class="w-full bg-amber-500 text-white p-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-amber-600 transition-all">Kirim Permintaan</button>
+                <div id="section-user-card" class="hidden bg-white dark:bg-slate-800 rounded-[30px] p-5 shadow-md border border-slate-100 dark:border-slate-700 relative overflow-hidden transition-all duration-500 z-20">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-pink-500/5 rounded-full blur-xl"></div>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <div class="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 rounded-2xl flex items-center justify-center text-2xl shadow-inner">👩‍⚕️</div>
+                            <div id="prof-mini-shift-badge" class="absolute -top-2 -left-2 bg-pink-600 text-white text-[7px] font-black px-2 py-0.5 rounded-full border-2 border-white dark:border-slate-800 animate-bounce">PAGI</div>
                         </div>
-                        <div id="swap-list-container" class="mt-6 pt-4 border-t border-amber-200 dark:border-amber-900">
-                            <p class="text-[8px] font-black text-amber-600 uppercase mb-2">Permintaan Aktif</p>
-                            <div id="swap-list" class="space-y-2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="section-schedule" class="hidden">
-                    <div class="bg-white dark:bg-slate-800 rounded-[30px] border border-slate-100 dark:border-slate-700 shadow-md overflow-hidden">
-                        <div class="flex items-center justify-between p-5 border-b dark:border-slate-700">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-2xl bg-teal-50 dark:bg-teal-900/30 text-teal-600 flex items-center justify-center text-sm shadow-inner">📅</div>
-                                <div>
-                                    <h3 class="font-black text-slate-700 dark:text-slate-100 text-[10px] uppercase tracking-[0.2em]">Jadwal Hari Ini</h3>
-                                    <p id="schedule-date-detail" class="text-[8px] font-black text-teal-600 dark:text-teal-400 uppercase mt-0.5 tracking-wider">Memuat...</p>
-                                </div>
+                        <div class="flex-1">
+                            <h4 id="prof-mini-name" class="font-black text-slate-800 dark:text-slate-100 text-xs uppercase tracking-tight">BIDAN NAME</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="prof-mini-status-badge" class="bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-md uppercase">SEDANG JAGA</span>
+                                <span id="prof-mini-date" class="text-[7px] font-bold text-slate-400 uppercase tracking-widest">01/05/2026</span>
                             </div>
                         </div>
-                        <div id="planned-list" class="p-5 space-y-4"></div>
                     </div>
                 </div>
 
                 <div id="section-actual" class="hidden">
                     <div class="flex items-center justify-between px-2 mb-4">
-                        <h3 class="font-black text-teal-600 dark:text-teal-400 text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
-                            <span class="w-1.5 h-4 bg-teal-500 rounded-full"></span>
+                        <h3 class="font-black text-pink-600 dark:text-pink-400 text-[10px] uppercase tracking-[0.3em] flex items-center gap-2">
+                            <span class="w-1.5 h-4 bg-pink-500 rounded-full"></span>
                             Aktivitas Terbaru
                         </h3>
                         <span class="badge-live shadow-sm">Realtime</span>
@@ -409,38 +341,23 @@
         </div>
 
         <div id="view-rekap" class="view-content">
-            <div class="bg-slate-900 p-6 pt-12 pb-10 text-white flex justify-between items-end shadow-lg" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="pink-header p-6 pt-12 pb-10 text-white flex justify-between items-end shadow-lg">
                 <div>
                     <h2 class="text-xl font-black uppercase italic tracking-tighter">Laporan Bulanan</h2>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1" id="rekap-period">Memuat Periode...</p>
+                    <p class="text-[9px] font-bold text-slate-100 uppercase tracking-widest mt-1" id="rekap-period">Memuat Periode...</p>
                 </div>
-                <button onclick="exportCurrentMonth()" class="bg-teal-600 w-12 h-12 rounded-2xl flex items-center justify-center border border-teal-500/30 hover:bg-teal-500 transition-all shadow-xl active:scale-90">
+                <button onclick="exportCurrentMonth()" class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center border border-white/30 hover:bg-white/30 transition-all shadow-xl active:scale-90">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
             
             <div class="py-4 space-y-3 flex-1 flex flex-col min-h-0">
-                <div class="filter-grid">
-                    <div class="search-container">
-                        <svg class="search-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" id="search-rekap" oninput="renderRekap()" placeholder="Cari nama bidan..." class="search-input">
-                    </div>
-                    <select id="filter-shift" onchange="renderRekap()" class="shift-filter shadow-sm">
-                        <option value="ALL">SEMUA</option>
-                        <option value="P">PAGI</option>
-                        <option value="S">SIANG</option>
-                        <option value="M">MALAM</option>
-                    </select>
-                </div>
-
-                <div class="px-4 py-1 flex justify-between items-center">
-                    <p id="rekap-month-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400"></p>
-                    <div id="user-legend" class="hidden flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-teal-100 border border-teal-200"></span>
-                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Baris Anda</span>
+                <div class="px-4">
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="search-rekap" oninput="renderRekap()" placeholder="Cari nama bidan..." class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 py-3 pl-12 pr-4 rounded-2xl text-[11px] font-bold outline-none">
                     </div>
                 </div>
-
                 <div class="rekap-wrapper" id="rekap-scroll-area">
                     <div id="rekap-container"></div>
                 </div>
@@ -448,41 +365,29 @@
         </div>
 
         <div id="view-profile" class="view-content">
-            <div class="profile-header shadow-xl">
-                <div class="profile-avatar shadow-2xl border-4 border-white/20">👩‍⚕️</div>
+            <div class="pink-header p-6 pt-12 pb-14 text-white relative shadow-xl text-center">
+                <div class="shift-indicator-badge" id="prof-shift-badge">
+                    <span class="text-[9px] font-black text-pink-600 uppercase tracking-[0.2em]">Memuat Shift...</span>
+                </div>
+                <div class="profile-avatar shadow-2xl border-4 border-white/20 mx-auto">👩‍⚕️</div>
                 <h2 id="prof-name" class="text-2xl font-black uppercase tracking-tight">---</h2>
                 <p class="text-[10px] font-bold opacity-80 uppercase tracking-[0.3em]">Bidan Pelaksana</p>
-                <p class="text-[8px] font-black opacity-60 mt-5 uppercase tracking-[0.1em]">UPTD Puskesmas Sampanahan • Kotabaru</p>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card shadow-lg">
                     <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase mb-2 tracking-widest leading-none">Kehadiran</p>
-                    <h4 id="prof-count" class="text-3xl font-black text-teal-600 dark:text-teal-400">0</h4>
+                    <h4 id="prof-count" class="text-3xl font-black text-pink-600">0</h4>
                     <p class="text-[7px] font-bold text-slate-300 dark:text-slate-600 uppercase mt-1">Bulan Ini</p>
                 </div>
                 <div class="stat-card shadow-lg">
-                    <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase mb-2 tracking-widest leading-none">Status Akun</p>
-                    <h4 class="text-lg font-black text-emerald-500 tracking-tighter">AKTIF</h4>
-                    <p class="text-[7px] font-bold text-slate-300 dark:text-slate-600 uppercase mt-1">Kepegawaian</p>
+                    <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase mb-2 tracking-widest leading-none">Status Jaga</p>
+                    <h4 id="prof-status-jaga" class="text-lg font-black text-emerald-500 tracking-tighter uppercase italic animate-pulse">OFF</h4>
+                    <p class="text-[7px] font-bold text-slate-300 dark:text-slate-600 uppercase mt-1">Sesi Aktif</p>
                 </div>
             </div>
 
-            <div class="px-5 mt-10 space-y-5">
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[35px] border border-slate-100 dark:border-slate-700 shadow-sm">
-                    <h5 class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mb-5">Informasi Akun</h5>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase">Sistem</span>
-                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">Presensi Bidan</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">Versi</span>
-                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">2.2.5-MASOOK_UI</span>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="px-5 mt-10">
                 <button onclick="logout()" class="w-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-5 rounded-[28px] font-black text-[10px] uppercase tracking-[0.3em] border border-rose-100 dark:border-rose-900/30 flex items-center justify-center gap-3 shadow-md hover:bg-rose-100 active:scale-95 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     Keluar Sesi
@@ -515,13 +420,13 @@
 
 <div id="modal-scan" class="modal-overlay">
     <div class="modal-card">
-        <div class="bg-teal-600 p-6 text-white text-center">
-            <h3 class="font-black uppercase tracking-widest text-sm">Scan QR Presensi</h3>
-            <p class="text-[9px] opacity-80 mt-1 uppercase">Arahkan kamera ke kode QR di ruangan</p>
+        <div class="pink-header p-6 text-white text-center">
+            <h3 class="font-black uppercase tracking-widest text-sm">Scan QR SABINA</h3>
+            <p class="text-[9px] opacity-80 mt-1 uppercase">Arahkan kamera ke kode QR</p>
         </div>
         <div class="p-6">
             <div id="reader" class="overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800" style="width:100%;"></div>
-            <button onclick="closeScan()" class="w-full mt-6 p-4 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-500 font-black text-[10px] uppercase tracking-widest">Batalkan</button>
+            <button onclick="closeScan()" class="w-full mt-6 p-4 rounded-2xl bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-widest">Batalkan</button>
         </div>
     </div>
 </div>
@@ -542,6 +447,42 @@
         isDarkMode: localStorage.getItem('dark_mode') === 'true',
         isOnline: navigator.onLine
     };
+
+    /**
+     * LOGIKA TANGGAL EFEKTIF (Shift Malam Cross-Day)
+     * Jam 00:00 - 07:59 dianggap tanggal kemarin untuk kepentingan shift malam.
+     */
+    function getLogicalDate(date = new Date()) {
+        let d = new Date(date);
+        if (d.getHours() < 8) d.setDate(d.getDate() - 1);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        return `${dd}/${mm}/${d.getFullYear()}`;
+    }
+
+    function playSound(type) {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'warning') {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            }
+        } catch(e) {}
+    }
 
     function toggleDarkMode() {
         state.isDarkMode = !state.isDarkMode;
@@ -577,49 +518,10 @@
         if (newQueue.length === 0) { fetchData(true); }
     }
 
-    async function submitSwapRequest() {
-        const myDate = document.getElementById('swap-my-date').value;
-        const targetBidan = document.getElementById('swap-with-who').value;
-        if (!myDate || !targetBidan || targetBidan === "") return showAlert("Eror", "Lengkapi formulir tukar shift.", "error");
-
-        showLoading(true);
-        try {
-            const d = new Date(myDate);
-            const dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-            
-            const res = await apiRequest('submitSwap', {
-                requester: state.user,
-                date: dateStr,
-                target: targetBidan
-            });
-            if (res.status === 'success') {
-                showAlert("Sukses", "Permintaan tukar shift terkirim.");
-                fetchData(true);
-                document.getElementById('swap-my-date').value = '';
-                document.getElementById('swap-with-who').value = '';
-            }
-        } catch (e) {
-            showAlert("Gagal", "Gagal mengirim pengajuan.", "error");
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    function checkShiftReminder() {
-        if (!state.user) return;
-        const hr = new Date().getHours();
-        const min = new Date().getMinutes();
-        if (min === 45 && [7, 13, 19].includes(hr)) {
-            console.log("Shift Reminder Check...");
-        }
-    }
-
     async function submitPresence() {
         const sh = getShift(), now = new Date(); 
         const logicalDate = getLogicalDate(now);
         
-        // --- VALIDASI ABSEN 2 KALI ---
-        // Cek apakah di log (baik dari server/cache) sudah ada entri dengan nama, tanggal, dan shift yang sama
         const isAlreadyScanned = (state.data.logs || []).some(log => 
             log.name === state.user && 
             log.date === logicalDate && 
@@ -627,13 +529,12 @@
         );
 
         if (isAlreadyScanned) {
-            return showAlert("Peringatan", `Anda sudah melakukan presensi untuk Shift ${sh.label} hari ini.`, "error");
+            playSound('warning');
+            return showAlert("Sudah Presensi", `Anda sudah absen Shift ${sh.label} hari ini.`, "error");
         }
 
         const payload = { 
-            name: state.user, 
-            date: logicalDate, 
-            shift: sh.label, 
+            name: state.user, date: logicalDate, shift: sh.label, 
             time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
         };
 
@@ -641,6 +542,7 @@
             const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
             queue.push({ payload, timestamp: Date.now() });
             localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+            playSound('success');
             playSuccessAnimation("Tersimpan Offline");
             return;
         }
@@ -649,15 +551,18 @@
         try {
             const res = await apiRequest('saveScan', payload);
             if(res.status === 'success') { 
+                playSound('success');
                 playSuccessAnimation();
                 fetchData(true); 
             } else {
+                playSound('warning');
                 showAlert("Gagal", res.message || "Gagal menyimpan data.", "error");
             }
         } catch (e) { 
             const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
             queue.push({ payload, timestamp: Date.now() });
             localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+            playSound('success');
             playSuccessAnimation("Tersimpan (Lokal)");
         }
         finally { showLoading(false); }
@@ -666,8 +571,7 @@
     function playSuccessAnimation(customTitle) {
         const overlay = document.getElementById('lottie-overlay');
         if(!overlay) return;
-        const title = overlay.querySelector('h2');
-        title.innerText = customTitle || "Presensi Berhasil!";
+        overlay.querySelector('h2').innerText = customTitle || "Presensi Berhasil!";
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
@@ -677,7 +581,7 @@
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = msg;
         const icon = document.getElementById('alert-icon');
-        icon.className = `w-10 h-10 rounded-full flex items-center justify-center text-xl ${type === 'error' ? 'bg-rose-50 text-rose-600' : 'bg-teal-50 text-teal-600 dark:bg-teal-900/30'}`;
+        icon.className = `w-10 h-10 rounded-full flex items-center justify-center text-xl ${type === 'error' ? 'bg-pink-50 text-pink-600' : 'bg-pink-50 text-pink-600'}`;
         icon.innerHTML = type === 'error' ? '✕' : '✅';
         alert.classList.add('show');
         setTimeout(() => alert.classList.remove('show'), 5000);
@@ -687,18 +591,10 @@
 
     function getShift() {
         const hr = new Date().getHours();
+        // Shift Malam: 20:00 - 07:59
+        if(hr >= 20 || hr < 8) return { label: 'Malam', code: 'M', icon: '🌙' };
         if(hr >= 8 && hr < 14) return { label: 'Pagi', code: 'P', icon: '☀️' };
-        if(hr >= 14 && hr < 20) return { label: 'Siang', code: 'S', icon: '☀️' };
-        return { label: 'Malam', code: 'M', icon: '🌙' };
-    }
-
-    function getLogicalDate(date = new Date()) {
-        let d = new Date(date);
-        if (d.getHours() < 8) d.setDate(d.getDate() - 1);
-        const dd = String(d.getDate()).padStart(2, '0');
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
+        return { label: 'Siang', code: 'S', icon: '☀️' };
     }
 
     function getDistance(lat1, lon1, lat2, lon2) {
@@ -710,46 +606,15 @@
     }
 
     function updateGPS() {
-        const indicator = document.getElementById('gps-indicator');
         const cfg = state.data.config || {};
-        const targetLat = -2.637022;
-        const targetLng = 116.203674;
-        const maxRadius = parseInt(cfg.radius) || 100;
-        
         if (cfg.gpsLock === true) {
-            indicator.classList.remove('hidden');
-            if (!navigator.geolocation) {
-                updateGPSUI("OUT", "GPS Tak Didukung");
-                return;
-            }
-
+            if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition((pos) => {
-                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, targetLat, targetLng);
+                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, -2.637022, 116.203674);
                 state.userDistance = dist;
-                state.isWithinRadius = dist <= maxRadius;
-                if (state.isWithinRadius) updateGPSUI("OK", "Dalam Radius");
-                else updateGPSUI("OUT", `${Math.round(dist)}m Diluar`);
-            }, (err) => {
-                updateGPSUI("OUT", "GPS Error");
-            }, { 
-                enableHighAccuracy: true,
-                timeout: 10000, 
-                maximumAge: 0 
-            });
-        } else { 
-            state.isWithinRadius = true; 
-            indicator.classList.add('hidden'); 
-        }
-    }
-
-    function updateGPSUI(status, label) {
-        const indicator = document.getElementById('gps-indicator');
-        const labelEl = document.getElementById('gps-label');
-        if (!indicator || !labelEl) return;
-        indicator.classList.remove('bg-emerald-500/30', 'bg-rose-500/30', 'border-emerald-400', 'border-rose-400', 'bg-white/10');
-        labelEl.innerText = label;
-        if (status === "OK") indicator.classList.add('bg-emerald-500/30', 'border-emerald-400');
-        else if (status === "OUT") indicator.classList.add('bg-rose-500/30', 'border-rose-400');
+                state.isWithinRadius = dist <= (parseInt(cfg.radius) || 100);
+            }, null, { enableHighAccuracy: true });
+        } else { state.isWithinRadius = true; }
     }
 
     async function apiRequest(action, payload = {}) {
@@ -772,9 +637,7 @@
                 if(document.getElementById('view-profile').classList.contains('active')) renderProfile();
             }
             updateGPS(); 
-        } catch (e) { 
-            if(!silent) showAlert("Gagal Sinkron", "Gagal menarik data terbaru.", "error"); 
-        }
+        } catch (e) { }
         finally { showLoading(false); }
     }
 
@@ -784,7 +647,7 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         const nav = document.getElementById(`nav-${v}`);
         if(nav) nav.classList.add('active');
-        if(v === 'rekap') { renderRekap(); setTimeout(() => scrollToToday(), 300); }
+        if(v === 'rekap') renderRekap();
         if(v === 'profile') renderProfile();
     }
 
@@ -792,227 +655,134 @@
         if(!state.user) return;
         document.getElementById('prof-name').innerText = state.user;
         const curMo = new Date().getMonth() + 1;
+        const sh = getShift();
+        const logDate = getLogicalDate();
+
         const count = (state.data.logs || []).filter(l => {
             const p = (l.date || "").split('/');
             return l.name === state.user && parseInt(p[1]) === curMo;
         }).length;
         document.getElementById('prof-count').innerText = count;
-    }
 
-    function scrollToToday() {
-        const today = new Date().getDate();
-        const targetCell = document.getElementById(`rekap-day-${today}`);
-        const scrollArea = document.getElementById('rekap-scroll-area');
-        if (targetCell && scrollArea) {
-            const offset = targetCell.offsetLeft - 150;
-            scrollArea.scrollTo({ left: offset, behavior: 'smooth' });
+        const shiftBadge = document.getElementById('prof-shift-badge');
+        shiftBadge.innerHTML = `<span class="text-[9px] font-black text-pink-600 uppercase tracking-[0.2em]">${sh.icon} Shift ${sh.label}</span>`;
+
+        // Cek Logika Sedang Jaga
+        const isJaga = (state.data.logs || []).some(log => 
+            log.name === state.user && log.date === logDate && log.shift === sh.label
+        );
+        const statusEl = document.getElementById('prof-status-jaga');
+        if(isJaga) {
+            statusEl.innerText = "SEDANG JAGA";
+            statusEl.className = "text-lg font-black text-emerald-500 animate-pulse uppercase italic";
+        } else {
+            statusEl.innerText = "OFF JAGA";
+            statusEl.className = "text-lg font-black text-rose-500 uppercase italic";
         }
     }
 
     function renderAll() {
-        const now = new Date(); const sh = getShift(); const logicalDateStr = getLogicalDate(now);
-        const lParts = logicalDateStr.split('/'); const lDay = parseInt(lParts[0]), lMonth = parseInt(lParts[1]);
-        const actualDay = now.getDate(), actualMonth = now.getMonth() + 1;
-
-        const clockEl = document.getElementById('clock');
-        if(clockEl) clockEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const now = new Date(); const sh = getShift(); const logicalDateStr = getLogicalDate();
+        
+        document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         document.getElementById('date-label').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
         document.getElementById('shift-label').innerText = `Shift ${sh.label}`;
         document.getElementById('shift-icon').innerText = sh.icon;
-        document.getElementById('schedule-date-detail').innerText = `Siklus: ${logicalDateStr}`;
 
-        document.getElementById('display-name').innerText = state.user ? `Halo, Bidan ${state.user}` : "Pilih Nama Anda";
         document.getElementById('btn-logout').classList.toggle('hidden', !state.user);
         document.getElementById('card-login').classList.toggle('hidden', !!state.user);
-        document.getElementById('section-schedule').classList.toggle('hidden', !state.user);
         document.getElementById('section-actual').classList.toggle('hidden', !state.user);
         
-        document.getElementById('section-swap').classList.toggle('hidden', !state.user);
+        const userCard = document.getElementById('section-user-card');
+        if (state.user) {
+            userCard.classList.remove('hidden');
+            document.getElementById('prof-mini-name').innerText = state.user;
+            document.getElementById('prof-mini-date').innerText = logicalDateStr;
+            document.getElementById('prof-mini-shift-badge').innerText = sh.label.toUpperCase();
+            
+            const isJaga = (state.data.logs || []).some(log => 
+                log.name === state.user && log.date === logicalDateStr && log.shift === sh.label
+            );
+            const miniStatus = document.getElementById('prof-mini-status-badge');
+            if(isJaga) {
+                miniStatus.innerText = "SEDANG JAGA";
+                miniStatus.className = "bg-emerald-500 text-white text-[7px] font-black px-2 py-0.5 rounded-md uppercase animate-pulse";
+            } else {
+                miniStatus.innerText = "OFF JAGA";
+                miniStatus.className = "bg-rose-500 text-white text-[7px] font-black px-2 py-0.5 rounded-md uppercase";
+            }
+        } else { userCard.classList.add('hidden'); }
 
         const select = document.getElementById('select-user');
-        const swapSelect = document.getElementById('swap-with-who');
-
-        if (swapSelect && state.user) {
-            const colleagues = state.data.officers.filter(o => o !== state.user);
-            swapSelect.innerHTML = colleagues.length === 0 ? '<option value="">(Tidak ada rekan)</option>' : 
-                '<option value="">-- Pilih Rekan --</option>' + colleagues.map(o => `<option value="${o}">${o}</option>`).join('');
-        }
-
         if (document.activeElement !== select) {
             select.innerHTML = state.data.officers.length === 0 ? '<option value="">(Memuat...)</option>' : 
                 '<option value="">-- Pilih Nama --</option>' + state.data.officers.map(o => `<option value="${o}" ${state.user === o ? 'selected' : ''}>${o}</option>`).join('');
         }
-        
-        let shifts = ['Pagi', 'Siang', 'Malam'];
-        shifts.sort((a, b) => a === sh.label ? -1 : b === sh.label ? 1 : 0);
-
-        let schedHtml = '';
-        shifts.forEach((s) => {
-            const code = s[0], isTarget = s === sh.label;
-            let tDay = (s === 'Malam') ? lDay : actualDay, tMo = (s === 'Malam') ? lMonth : actualMonth;
-            const names = (state.data.officers || []).filter(n => (state.data.schedule[n] || {})[tDay] === code);
-            const inactiveClass = isTarget ? '' : 'inactive';
-
-            schedHtml += `<div class="shift-card p-4 rounded-2xl border ${isTarget ? 'border-teal-200 ring-2 ring-teal-50 dark:ring-teal-900/30 shadow-md bg-white dark:bg-slate-800' : 'border-slate-100 dark:border-slate-700'} flex flex-col gap-2 ${inactiveClass}">
-                <div class="flex justify-between items-start">
-                    <div><span class="text-[9px] font-black uppercase tracking-widest ${isTarget ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}">${s}</span>
-                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-0.5">${tDay} ${MONTH_NAMES[tMo-1].substring(0,3)}</p></div>
-                    ${isTarget ? '<span class="badge-live shadow-sm">Aktif</span>' : ''}
-                </div><div class="flex flex-wrap gap-1.5">${names.length ? names.map(n => `<span class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-[9px] font-black uppercase shadow-sm">${n}</span>`).join('') : '<span class="text-[9px] text-slate-300 italic">Libur</span>'}</div></div>`;
-        });
-        document.getElementById('planned-list').innerHTML = schedHtml;
-
-        const swaps = state.data.swaps || [];
-        document.getElementById('swap-list').innerHTML = swaps.length ? swaps.map(s => `
-            <div class="swap-item shadow-sm dark:bg-slate-800">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-[9px] font-black text-slate-700 dark:text-slate-200 uppercase">${s.requester} ⇄ ${s.target}</p>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mt-0.5">Shift: ${s.date}</p>
-                    </div>
-                    <span class="text-[7px] px-2 py-1 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-black uppercase">Pending</span>
-                </div>
-            </div>
-        `).join('') : '<p class="text-center py-4 text-[9px] text-slate-400 italic">Belum ada pengajuan tukar shift</p>';
 
         const sortedLogs = (state.data.logs || []).filter(l => l.date === logicalDateStr).reverse();
         document.getElementById('actual-list').innerHTML = sortedLogs.length ? sortedLogs.map(l => {
             const isOngoing = l.shift === sh.label;
-            return `<div class="bg-white dark:bg-slate-800 p-4 rounded-[24px] border ${isOngoing ? 'border-teal-100 ring-2 ring-teal-50/50 shadow-md' : 'border-slate-100 dark:border-slate-700'} shadow-sm flex items-center justify-between">
-                <div class="flex items-center gap-4"><div class="w-11 h-11 rounded-2xl ${isOngoing ? 'bg-teal-600' : 'bg-slate-400'} text-white flex items-center justify-center font-black text-sm shadow-lg">${l.name[0]}</div>
+            return `<div class="bg-white dark:bg-slate-800 p-4 rounded-[24px] border ${isOngoing ? 'border-pink-100 ring-2 ring-pink-50/50' : 'border-slate-100 dark:border-slate-700'} shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-4"><div class="w-11 h-11 rounded-2xl ${isOngoing ? 'bg-pink-600' : 'bg-slate-400'} text-white flex items-center justify-center font-black text-sm shadow-lg">${l.name[0]}</div>
                 <div><p class="text-[10px] font-black uppercase text-slate-800 dark:text-slate-100">${l.name}</p><p class="text-[8px] font-bold text-slate-400 uppercase">Shift ${l.shift} • ${l.time}</p></div></div>
-                <div class="${isOngoing ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-900/30' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'} px-3 py-1.5 rounded-xl text-[8px] font-black uppercase border">${isOngoing ? 'Sedang Jaga' : 'Selesai Jaga'}</div></div>`}).join('') : '<p class="text-center py-10 text-[10px] text-slate-300 uppercase">Belum ada riwayat</p>';
+                <div class="${isOngoing ? 'bg-pink-50 text-pink-600' : 'bg-slate-100 text-slate-500'} px-3 py-1.5 rounded-xl text-[8px] font-black uppercase border border-current">${isOngoing ? 'Sedang Jaga' : 'Selesai Jaga'}</div></div>`}).join('') : '<p class="text-center py-10 text-[10px] text-slate-300 uppercase">Belum ada riwayat</p>';
     }
 
     function renderRekap() {
-        const now = new Date();
-        const curYr = now.getFullYear();
-        const curMo = now.getMonth();
-        const todayDay = now.getDate();
-        const daysInMo = new Date(curYr, curMo + 1, 0).getDate();
+        const now = new Date(); const curMo = now.getMonth(); const todayDay = now.getDate();
+        const daysInMo = new Date(now.getFullYear(), curMo + 1, 0).getDate();
         const query = document.getElementById('search-rekap').value.toLowerCase();
-        const shiftFilter = document.getElementById('filter-shift').value;
-        document.getElementById('rekap-month-label').innerText = `Periode: ${MONTH_NAMES[curMo]} ${curYr}`;
-        document.getElementById('user-legend').classList.toggle('hidden', !state.user);
         let table = `<table class="editor-table"><thead><tr><th class="sticky-col">NAMA BIDAN</th>`;
         for(let d=1; d<=daysInMo; d++) {
-            const dateObj = new Date(curYr, curMo, d);
-            const isSunday = dateObj.getDay() === 0;
-            const classes = `${d === todayDay ? 'today-col' : ''} ${isSunday ? 'sunday-col' : ''}`;
-            table += `<th id="rekap-day-${d}" class="${classes}">${d}</th>`;
+            const classes = `${d === todayDay ? 'today-col' : ''} ${new Date(now.getFullYear(), curMo, d).getDay() === 0 ? 'sunday-col' : ''}`;
+            table += `<th class="${classes}">${d}</th>`;
         }
-        table += `<th class="sticky-col-right text-slate-800">Σ</th></tr></thead><tbody>`;
-        const filtered = (state.data.officers || []).filter(name => {
-            if (!name.toLowerCase().includes(query)) return false;
-            if (shiftFilter === "ALL") return true;
-            return (state.data.logs || []).some(l => l.name === name && (l.date || "").split('/')[1] == (curMo + 1) && l.shift[0] === shiftFilter);
+        table += `<th class="sticky-col-right">Σ</th></tr></thead><tbody>`;
+        const filtered = (state.data.officers || []).filter(name => name.toLowerCase().includes(query));
+        filtered.forEach(name => {
+            let total = 0; table += `<tr class="${state.user === name ? 'my-row' : ''}"><td class="sticky-col uppercase text-[9px]">${name}</td>`;
+            for(let d=1; d<=daysInMo; d++) {
+                const log = (state.data.logs || []).find(l => { const p = (l.date || "").split('/'); return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); });
+                const code = log ? log.shift[0] : ''; if(code) total++;
+                table += `<td class="cell-${code} font-bold">${code}</td>`;
+            }
+            table += `<td class="sticky-col-right font-black shadow-sm">${total}</td></tr>`;
         });
-        if (!filtered.length) { table += `<tr><td colspan="${daysInMo + 2}" class="py-10 text-center font-bold text-slate-400 text-[9px]">Data tidak ditemukan</td></tr>`; } 
-        else {
-            filtered.forEach(name => {
-                let total = 0; 
-                const isSearching = query.length > 2 && name.toLowerCase().includes(query);
-                const isMe = state.user === name;
-                table += `<tr class="${isSearching ? 'highlight-row' : ''} ${isMe ? 'my-row' : ''}"><td class="sticky-col uppercase text-[9px]">${name}</td>`;
-                for(let d=1; d<=daysInMo; d++) {
-                    const log = (state.data.logs || []).find(l => { 
-                        const p = (l.date || "").split('/'); 
-                        return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); 
-                    });
-                    const code = log ? (log.shift ? log.shift[0] : '') : ''; 
-                    if(code) total++;
-                    const dateObj = new Date(curYr, curMo, d);
-                    const isSunday = dateObj.getDay() === 0;
-                    const classes = `${d === todayDay ? 'today-col' : ''} ${isSunday ? 'sunday-col' : ''}`;
-                    table += `<td class="${classes} cell-${code} font-bold">${code}</td>`;
-                }
-                table += `<td class="sticky-col-right font-black text-slate-800 dark:text-slate-100 shadow-sm">${total}</td></tr>`;
-            });
-        }
         document.getElementById('rekap-container').innerHTML = table + `</tbody></table>`;
-        document.getElementById('rekap-period').innerText = `${MONTH_NAMES[curMo]} ${curYr}`;
+        document.getElementById('rekap-period').innerText = `${MONTH_NAMES[curMo]} ${now.getFullYear()}`;
     }
 
     function loginUser() {
         const val = document.getElementById('select-user').value;
         if(!val) return showAlert("Peringatan", "Pilih nama Bidan.", "error");
-        state.user = val; localStorage.setItem('bidan_user', val); renderAll(); showAlert("Berhasil", "Selamat bertugas!");
+        state.user = val; localStorage.setItem('bidan_user', val); 
+        playSound('success'); renderAll(); showAlert("Berhasil", "Selamat bertugas!");
     }
 
     function logout() { if(confirm("Keluar dari sesi?")) { localStorage.removeItem('bidan_user'); state.user = null; showView('home'); renderAll(); } }
 
-    /** * BUG FIX: Fungsi Scan Diperbarui 
-     * Memastikan scanner benar-benar bersih sebelum dijalankan dan menangani delay inisialisasi DOM
-     */
     async function openScan() {
         if(!state.user) return showAlert("Akses Ditolak", "Pilih nama Bidan dahulu.", "error");
-        
         updateGPS();
         const cfg = state.data.config || {};
-        if (!state.isWithinRadius && cfg.gpsLock) {
-            return showAlert("Lokasi Tidak Valid", `Harap berada di area Puskesmas Sampanahan.`, "error");
-        }
-        
-        // Tampilkan modal terlebih dahulu
+        if (!state.isWithinRadius && cfg.gpsLock) return showAlert("Lokasi Tidak Valid", `Harap berada di area Puskesmas.`, "error");
         document.getElementById('modal-scan').style.display = 'flex';
-
-        // Pastikan scanner sebelumnya dihentikan total
-        if(state.scanner) {
-            try { 
-                await state.scanner.stop();
-                await state.scanner.clear();
-            } catch(e) { console.warn("Scanner cleanup warning:", e); }
-        }
-
-        // Inisialisasi ulang scanner
+        if(state.scanner) { try { await state.scanner.stop(); await state.scanner.clear(); } catch(e) {} }
         state.scanner = new Html5Qrcode("reader");
-        
-        const config = { 
-            fps: 15, // Ditingkatkan untuk responsivitas
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0
-        };
-
         try {
-            await state.scanner.start(
-                { facingMode: "environment" }, 
-                config, 
-                async (txt) => {
-                    // Cek kode QR (SISTEM-PRO-01 adalah fallback default)
-                    if(txt.trim() === cfg.qrData || txt.trim() === "UGD-SAMPANAHAN-SCAN") { 
-                        // Sukses: Tutup scanner secepat mungkin
-                        await closeScan(); 
-                        submitPresence(); 
-                    }
-                }
-            );
-        } catch (e) { 
-            console.error("Scanner Start Error:", e);
-            showAlert("Kamera Gagal", "Pastikan izin kamera aktif dan tidak sedang digunakan aplikasi lain.", "error"); 
-            document.getElementById('modal-scan').style.display = 'none';
-        }
+            await state.scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250, aspectRatio: 1.0 }, async (txt) => {
+                if(txt.trim() === cfg.qrData || txt.trim() === "UGD-SAMPANAHAN-SCAN") { await closeScan(); submitPresence(); }
+            });
+        } catch (e) { showAlert("Kamera Gagal", "Pastikan izin kamera aktif.", "error"); document.getElementById('modal-scan').style.display = 'none'; }
     }
 
     async function closeScan() { 
-        if(state.scanner) {
-            try {
-                // Gunakan try-catch karena stop() sering error jika kamera belum benar-benar siap
-                await state.scanner.stop();
-                state.scanner.clear();
-            } catch(e) { 
-                console.warn("Error stopping scanner:", e); 
-                // Jika stop gagal, pastikan DOM tetap dibersihkan
-                const reader = document.getElementById('reader');
-                if(reader) reader.innerHTML = ''; 
-            }
-            state.scanner = null;
-        }
+        if(state.scanner) { try { await state.scanner.stop(); state.scanner.clear(); } catch(e) { } state.scanner = null; }
         document.getElementById('modal-scan').style.display = 'none'; 
     }
 
     function exportCurrentMonth() {
-        const now = new Date(); 
-        const curMo = now.getMonth() + 1; 
+        const now = new Date(); const curMo = now.getMonth() + 1;
         const daysInMo = new Date(now.getFullYear(), curMo, 0).getDate();
         const header = ["NAMA BIDAN"]; for(let d=1; d<=daysInMo; d++) header.push(d.toString()); header.push("JUMLAH JAGA");
         const rows = (state.data.officers || []).map(name => {
@@ -1024,20 +794,16 @@
             rowData.push(total); return rowData;
         });
         const ws = XLSX.utils.aoa_to_sheet([[`REKAP PRESENSI BIDAN - ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`], [], header, ...rows]);
-        const colWidths = [{ wch: 25 }]; for(let d=1; d<=daysInMo; d++) colWidths.push({ wch: 4 }); colWidths.push({ wch: 15 }); ws['!cols'] = colWidths;
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Rekap");
         XLSX.writeFile(wb, `Rekap_Bidan_${MONTH_NAMES[now.getMonth()]}_${now.getFullYear()}.xlsx`);
     }
 
     window.onload = () => { 
-        applyDarkMode(); 
-        renderAll(); 
-        fetchData(); 
-        processQueue(); 
+        applyDarkMode(); renderAll(); fetchData(); processQueue(); 
         setInterval(() => renderAll(), 1000); 
         setInterval(() => updateGPS(), 15000); 
         setInterval(() => fetchData(true), 60000); 
-        setInterval(() => checkShiftReminder(), 60000); 
+        setInterval(() => { if(document.getElementById('view-profile').classList.contains('active')) renderProfile(); }, 60000); 
     };
 </script>
 </body>
