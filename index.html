@@ -961,7 +961,7 @@
                 { facingMode: "environment" }, 
                 config, 
                 async (txt) => {
-                    if(txt.trim() === cfg.qrData || txt.trim() === "SISTEM-PRO-01") { 
+                    if(txt.trim() === cfg.qrData || txt.trim() === "UGD-SAMPANAHAN-SCAN") { 
                         await state.scanner.stop(); 
                         closeScan(); 
                         submitPresence(); 
@@ -1009,7 +1009,7 @@
       const P_CONFIG = { gps: true, selfie: true, sync: true };
       
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1777430507004');
+        navigator.serviceWorker.register('./sw.js?v=1777430507005');
       }
 
       window.addEventListener('offline', () => document.getElementById('offline-banner').style.display='block');
