@@ -73,7 +73,7 @@
             flex: 1; 
             overflow-y: auto; 
             scrollbar-width: none;
-            padding-bottom: 100px; /* Adjusted for FAB and Nav */
+            padding-bottom: 100px; 
             position: relative;
         }
         .scrollable-content::-webkit-scrollbar { display: none; }
@@ -250,6 +250,28 @@
         .stat-card { background: var(--card-bg); padding: 24px 16px; border-radius: 24px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03); }
         
         select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25em; }
+
+        /* Radius Status Style */
+        #radius-status {
+            font-size: 7px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .in-radius { color: #4ade80; } /* Emerald 400 */
+        .out-radius { color: #f87171; } /* Red 400 */
+        .in-radius .status-dot { background-color: #4ade80; box-shadow: 0 0 6px #4ade80; }
+        .out-radius .status-dot { background-color: #f87171; box-shadow: 0 0 6px #f87171; }
     </style>
 
     <link rel="manifest" href="manifest.json?v=1777431249261">
@@ -295,14 +317,20 @@
                 </div>
                 
                 <div class="mt-8 flex items-center gap-3 relative z-10">
-                    <div class="bg-slate-900/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2">
-                        <span id="shift-icon" class="text-base">☀️</span>
-                        <span id="shift-label" class="text-[9px] font-black uppercase tracking-wider">Shift Pagi</span>
+                    <div class="flex flex-col">
+                        <div id="radius-status" class="out-radius">
+                            <span class="status-dot"></span>
+                            <span id="radius-text">Mendeteksi Lokasi...</span>
+                        </div>
+                        <div class="bg-slate-900/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2">
+                            <span id="shift-icon" class="text-base">☀️</span>
+                            <span id="shift-label" class="text-[9px] font-black uppercase tracking-wider">Shift Pagi</span>
+                        </div>
                     </div>
-                    <button onclick="toggleDarkMode()" class="bg-white/10 p-2 rounded-lg border border-white/10 ml-auto">
+                    <button onclick="toggleDarkMode()" class="bg-white/10 p-2 rounded-lg border border-white/10 ml-auto self-end">
                         <span id="dark-icon" class="text-base">🌙</span>
                     </button>
-                    <button onclick="logout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10">
+                    <button onclick="logout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10 self-end">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </div>
@@ -481,9 +509,9 @@
     const savedCache = localStorage.getItem(CACHE_KEY);
     let state = {
         user: localStorage.getItem('bidan_user') || null,
-        data: savedCache ? JSON.parse(savedCache) : { officers: [], logs: [], schedule: {}, config: { qrData: "SISTEM-PRO-01", gpsLock: true, lat: -2.637022, lng: 116.203674, radius: 100 }, swaps: [] },
+        data: savedCache ? JSON.parse(savedCache) : { officers: [], logs: [], schedule: {}, config: { qrData: "UGD-SAMPANAHAN-SCAN", gpsLock: true, lat: -2.637022, lng: 116.203674, radius: 100 }, swaps: [] },
         scanner: null,
-        isWithinRadius: true, 
+        isWithinRadius: false, 
         userDistance: 0,
         isDarkMode: localStorage.getItem('dark_mode') === 'true',
         isOnline: navigator.onLine
@@ -610,10 +638,32 @@
         if (cfg.gpsLock === true) {
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition((pos) => {
-                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, -2.637022, 116.203674);
-                state.userDistance = dist; state.isWithinRadius = dist <= (parseInt(cfg.radius) || 100);
-            }, null, { enableHighAccuracy: true });
-        } else { state.isWithinRadius = true; }
+                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, cfg.lat || -2.637022, cfg.lng || 116.203674);
+                state.userDistance = dist; 
+                state.isWithinRadius = dist <= (parseInt(cfg.radius) || 100);
+                updateRadiusUI();
+            }, (err) => {
+                console.error("GPS Error:", err);
+                document.getElementById('radius-text').innerText = "GPS Bermasalah";
+            }, { enableHighAccuracy: true });
+        } else { 
+            state.isWithinRadius = true; 
+            updateRadiusUI();
+        }
+    }
+
+    function updateRadiusUI() {
+        const container = document.getElementById('radius-status');
+        const text = document.getElementById('radius-text');
+        if (!container || !text) return;
+
+        if (state.isWithinRadius) {
+            container.className = "in-radius";
+            text.innerText = "Dalam Radius Jaga";
+        } else {
+            container.className = "out-radius";
+            text.innerText = "Luar Radius Jaga";
+        }
     }
 
     async function apiRequest(action, payload = {}) {
@@ -712,7 +762,6 @@
         document.getElementById('card-login').classList.toggle('hidden', !!state.user);
         document.getElementById('section-actual').classList.toggle('hidden', !state.user);
         
-        // Show/Hide Floating Button based on login state
         const floatingBtn = document.getElementById('btn-floating-presence');
         if(floatingBtn) floatingBtn.classList.toggle('hidden', !state.user);
 
@@ -817,7 +866,8 @@
 
     window.onload = () => { 
         applyDarkMode(); renderAll(); fetchData(); processQueue(); 
-        setInterval(() => renderAll(), 1000); setInterval(() => updateGPS(), 15000); 
+        setInterval(() => renderAll(), 1000); 
+        setInterval(() => updateGPS(), 5000); // More frequent update for radius status
         setInterval(() => fetchData(true), 60000); 
         setInterval(() => { if(document.getElementById('view-profile').classList.contains('active')) renderProfile(); }, 60000); 
     };
