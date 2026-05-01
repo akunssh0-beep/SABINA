@@ -276,10 +276,7 @@
         }
     </style>
 
-    <meta name="theme-color" content="#10b981">
-    <link rel="manifest" href="manifest.json?v=1777430507004">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json?v=1777431249261">
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         #offline-banner { position:fixed; top:0; left:0; right:0; background:#ef4444; color:white; text-align:center; padding:5px; z-index:9999; font-weight:bold; display:none; }
@@ -480,7 +477,7 @@
                             <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">Presensi Bidan</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase">Versi</span>
+                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">Versi</span>
                             <span class="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">2.2.5-MASOOK_UI</span>
                         </div>
                     </div>
@@ -619,9 +616,23 @@
 
     async function submitPresence() {
         const sh = getShift(), now = new Date(); 
+        const logicalDate = getLogicalDate(now);
+        
+        // --- VALIDASI ABSEN 2 KALI ---
+        // Cek apakah di log (baik dari server/cache) sudah ada entri dengan nama, tanggal, dan shift yang sama
+        const isAlreadyScanned = (state.data.logs || []).some(log => 
+            log.name === state.user && 
+            log.date === logicalDate && 
+            log.shift === sh.label
+        );
+
+        if (isAlreadyScanned) {
+            return showAlert("Peringatan", `Anda sudah melakukan presensi untuk Shift ${sh.label} hari ini.`, "error");
+        }
+
         const payload = { 
             name: state.user, 
-            date: getLogicalDate(now), 
+            date: logicalDate, 
             shift: sh.label, 
             time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
         };
@@ -640,6 +651,8 @@
             if(res.status === 'success') { 
                 playSuccessAnimation();
                 fetchData(true); 
+            } else {
+                showAlert("Gagal", res.message || "Gagal menyimpan data.", "error");
             }
         } catch (e) { 
             const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
@@ -671,11 +684,6 @@
     }
 
     function showLoading(show) { document.getElementById('loading-overlay').classList.toggle('hidden', !show); }
-    function showDevModal() { document.getElementById('modal-dev').style.display = 'flex'; }
-    function handleInfoClick() {
-        if(state.user) showView('profile');
-        else showDevModal();
-    }
 
     function getShift() {
         const hr = new Date().getHours();
@@ -933,51 +941,71 @@
 
     function logout() { if(confirm("Keluar dari sesi?")) { localStorage.removeItem('bidan_user'); state.user = null; showView('home'); renderAll(); } }
 
+    /** * BUG FIX: Fungsi Scan Diperbarui 
+     * Memastikan scanner benar-benar bersih sebelum dijalankan dan menangani delay inisialisasi DOM
+     */
     async function openScan() {
         if(!state.user) return showAlert("Akses Ditolak", "Pilih nama Bidan dahulu.", "error");
+        
         updateGPS();
         const cfg = state.data.config || {};
         if (!state.isWithinRadius && cfg.gpsLock) {
             return showAlert("Lokasi Tidak Valid", `Harap berada di area Puskesmas Sampanahan.`, "error");
         }
         
-        // Perbaikan Utama Scan: Pastikan modal terlihat dulu, bersihkan scanner lama
+        // Tampilkan modal terlebih dahulu
         document.getElementById('modal-scan').style.display = 'flex';
+
+        // Pastikan scanner sebelumnya dihentikan total
         if(state.scanner) {
-            try { await state.scanner.clear(); } catch(e) {}
+            try { 
+                await state.scanner.stop();
+                await state.scanner.clear();
+            } catch(e) { console.warn("Scanner cleanup warning:", e); }
         }
-        
+
+        // Inisialisasi ulang scanner
         state.scanner = new Html5Qrcode("reader");
         
         const config = { 
-            fps: 10, 
+            fps: 15, // Ditingkatkan untuk responsivitas
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0
         };
 
         try {
-            // Gunakan facingMode environment untuk kamera belakang otomatis
             await state.scanner.start(
                 { facingMode: "environment" }, 
                 config, 
                 async (txt) => {
+                    // Cek kode QR (SISTEM-PRO-01 adalah fallback default)
                     if(txt.trim() === cfg.qrData || txt.trim() === "UGD-SAMPANAHAN-SCAN") { 
-                        await state.scanner.stop(); 
-                        closeScan(); 
+                        // Sukses: Tutup scanner secepat mungkin
+                        await closeScan(); 
                         submitPresence(); 
                     }
                 }
             );
         } catch (e) { 
-            console.error(e);
-            showAlert("Kamera Eror", "Harap izinkan akses kamera atau pastikan tidak dipakai aplikasi lain.", "error"); 
-            closeScan(); 
+            console.error("Scanner Start Error:", e);
+            showAlert("Kamera Gagal", "Pastikan izin kamera aktif dan tidak sedang digunakan aplikasi lain.", "error"); 
+            document.getElementById('modal-scan').style.display = 'none';
         }
     }
 
-    function closeScan() { 
+    async function closeScan() { 
         if(state.scanner) {
-            state.scanner.stop().then(() => state.scanner.clear()).catch(e => {});
+            try {
+                // Gunakan try-catch karena stop() sering error jika kamera belum benar-benar siap
+                await state.scanner.stop();
+                state.scanner.clear();
+            } catch(e) { 
+                console.warn("Error stopping scanner:", e); 
+                // Jika stop gagal, pastikan DOM tetap dibersihkan
+                const reader = document.getElementById('reader');
+                if(reader) reader.innerHTML = ''; 
+            }
+            state.scanner = null;
         }
         document.getElementById('modal-scan').style.display = 'none'; 
     }
@@ -1001,32 +1029,16 @@
         XLSX.writeFile(wb, `Rekap_Bidan_${MONTH_NAMES[now.getMonth()]}_${now.getFullYear()}.xlsx`);
     }
 
-    window.onload = () => { applyDarkMode(); renderAll(); fetchData(); processQueue(); setInterval(() => renderAll(), 1000); setInterval(() => updateGPS(), 15000); setInterval(() => fetchData(true), 60000); setInterval(() => checkShiftReminder(), 60000); };
+    window.onload = () => { 
+        applyDarkMode(); 
+        renderAll(); 
+        fetchData(); 
+        processQueue(); 
+        setInterval(() => renderAll(), 1000); 
+        setInterval(() => updateGPS(), 15000); 
+        setInterval(() => fetchData(true), 60000); 
+        setInterval(() => checkShiftReminder(), 60000); 
+    };
 </script>
-
-    <script>
-      // SMART OFFLINE SYNC
-      const P_CONFIG = { gps: true, selfie: true, sync: true };
-      
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=1777430507005');
-      }
-
-      window.addEventListener('offline', () => document.getElementById('offline-banner').style.display='block');
-      window.addEventListener('online', () => {
-        document.getElementById('offline-banner').style.display='none';
-        syncData();
-      });
-
-      function syncData() {
-        const queue = JSON.parse(localStorage.getItem('absensi_queue') || '[]');
-        if(queue.length > 0) {
-            console.log('Syncing data Puskesmas...');
-            // Logika Auto kirim ke GAS
-            queue.forEach(item => { /* Post to API */ });
-            localStorage.setItem('absensi_queue', '[]');
-        }
-      }
-    </script>
 </body>
 </html>
