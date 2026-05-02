@@ -272,6 +272,19 @@
         .out-radius { color: #f87171; } /* Red 400 */
         .in-radius .status-dot { background-color: #4ade80; box-shadow: 0 0 6px #4ade80; }
         .out-radius .status-dot { background-color: #f87171; box-shadow: 0 0 6px #f87171; }
+
+        /* New Alarm & Logout Styles */
+        #alarm-banner {
+            position: fixed; top: 10px; left: 10px; right: 10px;
+            background: #4f46e5; color: white; padding: 12px 20px;
+            border-radius: 16px; z-index: 3000; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+            display: none; align-items: center; gap: 12px; animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes bounceIn { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .confirm-popup {
+            padding: 30px; text-align: center;
+        }
     </style>
 
     <link rel="manifest" href="manifest.json?v=1777431249261">
@@ -284,6 +297,15 @@
 <div id="lottie-overlay">
     <dotlottie-player id="success-lottie" src="https://lottie.host/7e6c4664-9694-4d89-9e0c-5f728c467a9d/UqGzGqXJ1Y.json" background="transparent" speed="1" style="width: 250px; height: 250px;" loop autoplay></dotlottie-player>
     <h2 class="text-indigo-600 font-black text-lg uppercase tracking-widest -mt-10">Presensi Berhasil! ✨</h2>
+</div>
+
+<div id="alarm-banner">
+    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl animate-pulse">⏰</div>
+    <div class="flex-1">
+        <p class="text-[10px] font-black uppercase opacity-70">Waktunya Ganti Shift!</p>
+        <p class="text-[12px] font-bold">Segera lakukan absen keluar/masuk ya.</p>
+    </div>
+    <button onclick="dismissAlarm()" class="text-white opacity-50 hover:opacity-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>
 </div>
 
 <div id="custom-alert">
@@ -330,7 +352,7 @@
                     <button onclick="toggleDarkMode()" class="bg-white/10 p-2 rounded-lg border border-white/10 ml-auto self-end">
                         <span id="dark-icon" class="text-base">🌙</span>
                     </button>
-                    <button onclick="logout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10 self-end">
+                    <button onclick="confirmLogout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10 self-end">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </div>
@@ -444,7 +466,7 @@
             </div>
 
             <div class="px-8 mt-12 mb-10">
-                <button onclick="logout()" class="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 p-5 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 transition-all active:bg-rose-50 active:text-rose-600">
+                <button onclick="confirmLogout()" class="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 p-5 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 transition-all active:bg-rose-50 active:text-rose-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     Istirahat Sejenak (Logout)
                 </button>
@@ -498,6 +520,18 @@
     </div>
 </div>
 
+<div id="modal-logout" class="modal-overlay">
+    <div class="modal-card confirm-popup">
+        <div class="w-20 h-20 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">👋</div>
+        <h3 class="font-black text-slate-800 dark:text-white text-lg mb-2">Ingin Istirahat?</h3>
+        <p class="text-slate-400 text-[11px] font-medium leading-relaxed mb-8 uppercase tracking-wider">Sesi Anda akan berakhir, namun data absen hari ini tetap aman tersimpan di sistem.</p>
+        <div class="flex gap-3">
+            <button onclick="closeLogoutModal()" class="flex-1 p-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-widest">Batal</button>
+            <button onclick="executeLogout()" class="flex-1 p-4 rounded-xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-200 dark:shadow-none">Ya, Keluar</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9H0-WEyNc50HcHMR6ErIWJ0-dB-Voyrq_vERJmQwIF0_dcjYHBr1cKHMlh-f1-SJp/exec";
     const MONTH_NAMES = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -505,6 +539,7 @@
     const QUEUE_KEY = "bidan_offline_queue";
     const VIEW_ORDER = ['home', 'rekap', 'profile'];
     let currentActiveView = 'home';
+    let alarmPlayed = false;
 
     const savedCache = localStorage.getItem(CACHE_KEY);
     let state = {
@@ -538,8 +573,39 @@
             } else if (type === 'warning') {
                 oscillator.type = 'sawtooth'; oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'alarm') {
+                oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.6);
             }
         } catch(e) {}
+    }
+
+    function checkShiftAlarm() {
+        if (!state.user) return;
+        const now = new Date();
+        const hrs = now.getHours();
+        const mins = now.getMinutes();
+        
+        // Cek jika mendekati waktu ganti shift (07:45-08:00, 13:45-14:00, 19:45-20:00)
+        const isNearShiftChange = (mins >= 45 && mins <= 59) && (hrs === 7 || hrs === 13 || hrs === 19);
+        
+        if (isNearShiftChange && !alarmPlayed) {
+            showAlarm();
+            playSound('alarm');
+            alarmPlayed = true;
+        } else if (!isNearShiftChange) {
+            alarmPlayed = false; // Reset alarm state jika di luar jam tersebut
+            dismissAlarm();
+        }
+    }
+
+    function showAlarm() {
+        document.getElementById('alarm-banner').style.display = 'flex';
+    }
+
+    function dismissAlarm() {
+        document.getElementById('alarm-banner').style.display = 'none';
     }
 
     function toggleDarkMode() {
@@ -794,6 +860,9 @@
                 <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl ${isOngoing ? 'bg-indigo-600' : 'bg-slate-300'} text-white flex items-center justify-center font-black text-xs">${l.name[0]}</div>
                 <div><p class="text-[10px] font-black uppercase text-slate-800 dark:text-slate-100">${l.name}</p><p class="text-[8px] font-bold text-slate-400 uppercase">Shift ${l.shift} • ${l.time}</p></div></div>
                 <div class="${isOngoing ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'} px-3 py-1.5 rounded-lg text-[7px] font-black uppercase border border-current">${isOngoing ? '🔥 Bertugas' : '✅ Selesai'}</div></div>`}).join('') : '<div class="text-center py-10"><p class="text-[10px] text-slate-300 uppercase tracking-widest">Belum ada aktivitas hari ini. <br> Jadilah yang pertama! 🚀</p></div>';
+        
+        // Periksa alarm setiap menit
+        checkShiftAlarm();
     }
 
     function renderRekap() {
@@ -826,7 +895,20 @@
         playSound('success'); renderAll(); showAlert("Berhasil Masuk!", "Selamat bertugas dan jaga kesehatan!");
     }
 
-    function logout() { if(confirm("Ingin keluar dari sesi ini? Datamu tetap tersimpan kok!")) { localStorage.removeItem('bidan_user'); state.user = null; showView('home'); renderAll(); } }
+    // New Logout confirmation functions
+    function confirmLogout() {
+        document.getElementById('modal-logout').style.display = 'flex';
+    }
+    function closeLogoutModal() {
+        document.getElementById('modal-logout').style.display = 'none';
+    }
+    function executeLogout() {
+        localStorage.removeItem('bidan_user'); 
+        state.user = null; 
+        closeLogoutModal();
+        showView('home'); 
+        renderAll();
+    }
 
     async function openScan() {
         if(!state.user) return showAlert("Akses Terbatas", "Login dulu yuk sebelum presensi.", "error");
@@ -867,7 +949,7 @@
     window.onload = () => { 
         applyDarkMode(); renderAll(); fetchData(); processQueue(); 
         setInterval(() => renderAll(), 1000); 
-        setInterval(() => updateGPS(), 5000); // More frequent update for radius status
+        setInterval(() => updateGPS(), 5000); 
         setInterval(() => fetchData(true), 60000); 
         setInterval(() => { if(document.getElementById('view-profile').classList.contains('active')) renderProfile(); }, 60000); 
     };
