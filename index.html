@@ -186,7 +186,6 @@
         .cell-S { background-color: #fff1f2 !important; color: #e11d48 !important; }
         .cell-M { background-color: #eef2ff !important; color: #4338ca !important; }
         
-        /* New Double Shift Style */
         .cell-multi { 
             background: linear-gradient(135deg, #fdf2f8 0%, #eef2ff 100%) !important; 
             color: #6366f1 !important; 
@@ -212,7 +211,6 @@
         .nav-item.active { background: #f1f5f9; color: var(--primary); }
         .dark .nav-item.active { background: #1e293b; }
 
-        /* Floating Action Button (FAB) */
         .btn-floating {
             position: absolute;
             bottom: 90px;
@@ -260,7 +258,6 @@
         
         select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25em; }
 
-        /* Radius Status Style */
         #radius-status {
             font-size: 7px;
             font-weight: 800;
@@ -277,12 +274,11 @@
             border-radius: 50%;
             display: inline-block;
         }
-        .in-radius { color: #4ade80; } /* Emerald 400 */
-        .out-radius { color: #f87171; } /* Red 400 */
+        .in-radius { color: #4ade80; }
+        .out-radius { color: #f87171; }
         .in-radius .status-dot { background-color: #4ade80; box-shadow: 0 0 6px #4ade80; }
         .out-radius .status-dot { background-color: #f87171; box-shadow: 0 0 6px #f87171; }
 
-        /* New Alarm & Logout Styles */
         #alarm-banner {
             position: fixed; top: 10px; left: 10px; right: 10px;
             background: #4f46e5; color: white; padding: 12px 20px;
@@ -293,6 +289,15 @@
         
         .confirm-popup {
             padding: 30px; text-align: center;
+        }
+
+        /* Animation for Sync Icon */
+        .rotating {
+            animation: rotate 1s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 
@@ -358,12 +363,20 @@
                             <span id="shift-label" class="text-[9px] font-black uppercase tracking-wider">Shift Pagi</span>
                         </div>
                     </div>
-                    <button onclick="toggleDarkMode()" class="bg-white/10 p-2 rounded-lg border border-white/10 ml-auto self-end">
-                        <span id="dark-icon" class="text-base">🌙</span>
-                    </button>
-                    <button onclick="confirmLogout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10 self-end">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
+                    
+                    <div class="flex gap-2 ml-auto self-end">
+                        <button onclick="fetchData(false)" id="btn-sync" class="bg-white/10 p-2 rounded-lg border border-white/10">
+                            <svg id="sync-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                        <button onclick="toggleDarkMode()" class="bg-white/10 p-2 rounded-lg border border-white/10">
+                            <span id="dark-icon" class="text-base">🌙</span>
+                        </button>
+                        <button onclick="confirmLogout()" id="btn-logout" class="hidden bg-white/10 p-2 rounded-lg border border-white/10">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -595,9 +608,7 @@
         const now = new Date();
         const hrs = now.getHours();
         const mins = now.getMinutes();
-        
         const isNearShiftChange = (mins >= 45 && mins <= 59) && (hrs === 7 || hrs === 13 || hrs === 19);
-        
         if (isNearShiftChange && !alarmPlayed) {
             showAlarm();
             playSound('alarm');
@@ -730,7 +741,6 @@
         const container = document.getElementById('radius-status');
         const text = document.getElementById('radius-text');
         if (!container || !text) return;
-
         if (state.isWithinRadius) {
             container.className = "in-radius";
             text.innerText = "Dalam Radius Jaga";
@@ -749,16 +759,26 @@
     }
 
     async function fetchData(silent = false) {
-        if(!silent && state.data.officers.length === 0) showLoading(true);
+        const syncIcon = document.getElementById('sync-icon');
+        if (!silent) {
+            showLoading(true);
+            if (syncIcon) syncIcon.classList.add('rotating');
+        }
         try { 
             const result = await apiRequest('getData'); 
             if (result && result.officers) { 
                 state.data = result; localStorage.setItem(CACHE_KEY, JSON.stringify(result)); renderAll(); 
                 if(document.getElementById('view-rekap').classList.contains('active')) renderRekap(); 
                 if(document.getElementById('view-profile').classList.contains('active')) renderProfile();
+                if (!silent) showAlert("Sinkronisasi Berhasil", "Data terbaru telah dimuat.");
             }
             updateGPS(); 
-        } catch (e) { } finally { showLoading(false); }
+        } catch (e) { 
+            if (!silent) showAlert("Gagal Sinkron", "Periksa koneksi internet Anda.", "error");
+        } finally { 
+            showLoading(false); 
+            if (syncIcon) syncIcon.classList.remove('rotating');
+        }
     }
 
     function showView(nextView) {
@@ -792,11 +812,9 @@
             const p = (l.date || "").split('/'); return l.name === state.user && parseInt(p[1]) === curMo;
         });
         const count = logs.length;
-        
         const countEl = document.getElementById('prof-count');
         const progressText = document.getElementById('progress-val-text');
         const progressBar = document.getElementById('prof-progress-bar');
-        
         let start = 0;
         const duration = 1000;
         const step = (timestamp) => {
@@ -808,17 +826,14 @@
             if (progress < 1) window.requestAnimationFrame(step);
         };
         window.requestAnimationFrame(step);
-
         const target = 20;
         const percent = Math.min((count / target) * 100, 100);
         setTimeout(() => { progressBar.style.width = percent + '%'; }, 100);
-
         const rankIcon = document.getElementById('rank-icon');
         const rankText = document.getElementById('rank-text');
         if (count >= 20) { rankIcon.innerText = '🥇'; rankText.innerText = 'Gold'; }
         else if (count >= 10) { rankIcon.innerText = '🥈'; rankText.innerText = 'Silver'; }
         else { rankIcon.innerText = '🥉'; rankText.innerText = 'Bronze'; }
-
         document.getElementById('prof-shift-badge').innerHTML = `${sh.icon} Shift ${sh.label}`;
         const isJaga = (state.data.logs || []).some(log => log.name === state.user && log.date === logDate && log.shift === sh.label);
         const statusEl = document.getElementById('prof-status-jaga');
@@ -835,10 +850,8 @@
         document.getElementById('btn-logout').classList.toggle('hidden', !state.user);
         document.getElementById('card-login').classList.toggle('hidden', !!state.user);
         document.getElementById('section-actual').classList.toggle('hidden', !state.user);
-        
         const floatingBtn = document.getElementById('btn-floating-presence');
         if(floatingBtn) floatingBtn.classList.toggle('hidden', !state.user);
-
         const userCard = document.getElementById('section-user-card');
         if (state.user) {
             userCard.classList.remove('hidden');
@@ -855,48 +868,39 @@
             select.innerHTML = state.data.officers.length === 0 ? '<option value="">⏳ Memuat...</option>' : 
                 '<option value="">-- 👋 Pilih Akun --</option>' + state.data.officers.map(o => `<option value="${o}" ${state.user === o ? 'selected' : ''}>${o}</option>`).join('');
         }
-        
         const sortedLogs = (state.data.logs || []).filter(l => l.date === logicalDateStr).sort((a, b) => {
             if (a.shift === sh.label && b.shift !== sh.label) return -1;
             if (a.shift !== sh.label && b.shift === sh.label) return 1;
             return 0; 
         });
-
         document.getElementById('actual-list').innerHTML = sortedLogs.length ? sortedLogs.map(l => {
             const isOngoing = l.shift === sh.label;
             return `<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border ${isOngoing ? 'border-indigo-100 ring-4 ring-indigo-50/30' : 'border-slate-100 dark:border-slate-700'} flex items-center justify-between shadow-sm">
                 <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl ${isOngoing ? 'bg-indigo-600' : 'bg-slate-300'} text-white flex items-center justify-center font-black text-xs">${l.name[0]}</div>
                 <div><p class="text-[10px] font-black uppercase text-slate-800 dark:text-slate-100">${l.name}</p><p class="text-[8px] font-bold text-slate-400 uppercase">Shift ${l.shift} • ${l.time}</p></div></div>
                 <div class="${isOngoing ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'} px-3 py-1.5 rounded-lg text-[7px] font-black uppercase border border-current">${isOngoing ? '🔥 Bertugas' : '✅ Selesai'}</div></div>`}).join('') : '<div class="text-center py-10"><p class="text-[10px] text-slate-300 uppercase tracking-widest">Belum ada aktivitas hari ini. <br> Jadilah yang pertama! 🚀</p></div>';
-        
         checkShiftAlarm();
     }
 
-    // UPDATED: renderRekap with Double Shift Logic
     function renderRekap() {
         const now = new Date(); const curMo = now.getMonth(); const todayDay = now.getDate();
         const daysInMo = new Date(now.getFullYear(), curMo + 1, 0).getDate();
         const query = document.getElementById('search-rekap').value.toLowerCase();
-        
         let table = `<table class="editor-table"><thead><tr><th class="sticky-col">NAMA BIDAN</th>`;
         for(let d=1; d<=daysInMo; d++) {
             const classes = `${d === todayDay ? 'today-col' : ''} ${new Date(now.getFullYear(), curMo, d).getDay() === 0 ? 'sunday-col' : ''}`; table += `<th class="${classes}">${d}</th>`;
         }
         table += `<th class="sticky-col-right">Σ</th></tr></thead><tbody>`;
         const filtered = (state.data.officers || []).filter(name => name.toLowerCase().includes(query));
-        
         filtered.forEach(name => {
             let total = 0; table += `<tr class="${state.user === name ? 'my-row' : ''}"><td class="sticky-col uppercase text-[9px]">${name}</td>`;
             for(let d=1; d<=daysInMo; d++) {
-                // Get all logs for this person on this day
                 const dayLogs = (state.data.logs || []).filter(l => { 
                     const p = (l.date || "").split('/'); 
                     return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); 
                 });
-
                 if(dayLogs.length > 0) {
                     total += dayLogs.length; 
-                    // Combine shift codes (e.g., P+M)
                     const codes = dayLogs.map(l => l.shift[0]).sort().join('+');
                     const cellClass = dayLogs.length > 1 ? 'cell-multi' : `cell-${codes}`;
                     table += `<td class="${cellClass} font-bold">${codes}</td>`;
@@ -950,7 +954,6 @@
         document.getElementById('modal-scan').style.display = 'none'; 
     }
 
-    // UPDATED: export with Double Shift Logic
     function exportCurrentMonth() {
         const now = new Date(); const curMo = now.getMonth() + 1;
         const daysInMo = new Date(now.getFullYear(), curMo, 0).getDate();
@@ -978,7 +981,7 @@
     }
 
     window.onload = () => { 
-        applyDarkMode(); renderAll(); fetchData(); processQueue(); 
+        applyDarkMode(); renderAll(); fetchData(true); processQueue(); 
         setInterval(() => renderAll(), 1000); 
         setInterval(() => updateGPS(), 5000); 
         setInterval(() => fetchData(true), 60000); 
