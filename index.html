@@ -186,6 +186,15 @@
         .cell-S { background-color: #fff1f2 !important; color: #e11d48 !important; }
         .cell-M { background-color: #eef2ff !important; color: #4338ca !important; }
         
+        /* New Double Shift Style */
+        .cell-multi { 
+            background: linear-gradient(135deg, #fdf2f8 0%, #eef2ff 100%) !important; 
+            color: #6366f1 !important; 
+            font-size: 8px !important;
+            letter-spacing: -0.5px;
+            border: 1px solid #db277733 !important;
+        }
+
         .today-col { background-color: var(--neutral-soft); border-left: 2px solid var(--primary) !important; border-right: 2px solid var(--primary) !important; }
         .sunday-col { background-color: #fff1f2 !important; color: #ef4444 !important; }
 
@@ -587,7 +596,6 @@
         const hrs = now.getHours();
         const mins = now.getMinutes();
         
-        // Cek jika mendekati waktu ganti shift (07:45-08:00, 13:45-14:00, 19:45-20:00)
         const isNearShiftChange = (mins >= 45 && mins <= 59) && (hrs === 7 || hrs === 13 || hrs === 19);
         
         if (isNearShiftChange && !alarmPlayed) {
@@ -595,7 +603,7 @@
             playSound('alarm');
             alarmPlayed = true;
         } else if (!isNearShiftChange) {
-            alarmPlayed = false; // Reset alarm state jika di luar jam tersebut
+            alarmPlayed = false; 
             dismissAlarm();
         }
     }
@@ -861,10 +869,10 @@
                 <div><p class="text-[10px] font-black uppercase text-slate-800 dark:text-slate-100">${l.name}</p><p class="text-[8px] font-bold text-slate-400 uppercase">Shift ${l.shift} • ${l.time}</p></div></div>
                 <div class="${isOngoing ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'} px-3 py-1.5 rounded-lg text-[7px] font-black uppercase border border-current">${isOngoing ? '🔥 Bertugas' : '✅ Selesai'}</div></div>`}).join('') : '<div class="text-center py-10"><p class="text-[10px] text-slate-300 uppercase tracking-widest">Belum ada aktivitas hari ini. <br> Jadilah yang pertama! 🚀</p></div>';
         
-        // Periksa alarm setiap menit
         checkShiftAlarm();
     }
 
+    // UPDATED: renderRekap with Double Shift Logic
     function renderRekap() {
         const now = new Date(); const curMo = now.getMonth(); const todayDay = now.getDate();
         const daysInMo = new Date(now.getFullYear(), curMo + 1, 0).getDate();
@@ -876,11 +884,25 @@
         }
         table += `<th class="sticky-col-right">Σ</th></tr></thead><tbody>`;
         const filtered = (state.data.officers || []).filter(name => name.toLowerCase().includes(query));
+        
         filtered.forEach(name => {
             let total = 0; table += `<tr class="${state.user === name ? 'my-row' : ''}"><td class="sticky-col uppercase text-[9px]">${name}</td>`;
             for(let d=1; d<=daysInMo; d++) {
-                const log = (state.data.logs || []).find(l => { const p = (l.date || "").split('/'); return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); });
-                const code = log ? log.shift[0] : ''; if(code) total++; table += `<td class="cell-${code} font-bold">${code}</td>`;
+                // Get all logs for this person on this day
+                const dayLogs = (state.data.logs || []).filter(l => { 
+                    const p = (l.date || "").split('/'); 
+                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); 
+                });
+
+                if(dayLogs.length > 0) {
+                    total += dayLogs.length; 
+                    // Combine shift codes (e.g., P+M)
+                    const codes = dayLogs.map(l => l.shift[0]).sort().join('+');
+                    const cellClass = dayLogs.length > 1 ? 'cell-multi' : `cell-${codes}`;
+                    table += `<td class="${cellClass} font-bold">${codes}</td>`;
+                } else {
+                    table += `<td></td>`;
+                }
             }
             table += `<td class="sticky-col-right font-black">${total}</td></tr>`;
         });
@@ -895,7 +917,6 @@
         playSound('success'); renderAll(); showAlert("Berhasil Masuk!", "Selamat bertugas dan jaga kesehatan!");
     }
 
-    // New Logout confirmation functions
     function confirmLogout() {
         document.getElementById('modal-logout').style.display = 'flex';
     }
@@ -929,6 +950,7 @@
         document.getElementById('modal-scan').style.display = 'none'; 
     }
 
+    // UPDATED: export with Double Shift Logic
     function exportCurrentMonth() {
         const now = new Date(); const curMo = now.getMonth() + 1;
         const daysInMo = new Date(now.getFullYear(), curMo, 0).getDate();
@@ -936,8 +958,17 @@
         const rows = (state.data.officers || []).map(name => {
             let total = 0; const rowData = [name];
             for(let d=1; d<=daysInMo; d++) {
-                const log = (state.data.logs || []).find(l => { const p = (l.date || "").split('/'); return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === curMo; });
-                const code = log ? (log.shift ? log.shift[0] : '') : ''; if(code) total++; rowData.push(code);
+                const dayLogs = (state.data.logs || []).filter(l => { 
+                    const p = (l.date || "").split('/'); 
+                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === curMo; 
+                });
+                if(dayLogs.length > 0) {
+                    total += dayLogs.length;
+                    const codes = dayLogs.map(l => l.shift[0]).sort().join('+');
+                    rowData.push(codes);
+                } else {
+                    rowData.push('');
+                }
             }
             rowData.push(total); return rowData;
         });
