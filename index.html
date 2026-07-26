@@ -171,17 +171,31 @@
             position: relative;
             flex: 1;
             margin-top: 10px;
+            -webkit-overflow-scrolling: touch;
         }
         
         .editor-table { border-collapse: separate; border-spacing: 0; min-width: max-content; font-size: 11px; width: 100%; }
-        .editor-table th, .editor-table td { border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; padding: 14px 10px; color: var(--text-main); }
+        .editor-table th, .editor-table td { border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; padding: 12px 8px; color: var(--text-main); }
+        
         .editor-table th { background: var(--neutral-soft); font-weight: 800; color: var(--text-mute); text-transform: uppercase; font-size: 9px; position: sticky; top: 0; z-index: 20; }
         
-        .sticky-col { position: sticky; left: 0; background: var(--card-bg) !important; z-index: 30; min-width: 130px; text-align: left !important; padding-left: 20px !important; border-right: 2px solid var(--border-color) !important; font-weight: 700; color: var(--text-main); }
-        th.sticky-col { z-index: 40; background: var(--neutral-soft) !important; }
+        .editor-table tfoot td { 
+            position: sticky; 
+            bottom: 0; 
+            background: var(--neutral-soft) !important; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            z-index: 20; 
+            border-top: 2px solid var(--border-color); 
+        }
 
-        .sticky-col-right { position: sticky; right: 0; background: var(--neutral-soft) !important; z-index: 30; min-width: 60px; border-left: 1px solid var(--border-color) !important; font-weight: 800; color: var(--accent); }
-        
+        .sticky-col { position: sticky; left: 0; background: var(--card-bg) !important; z-index: 30; min-width: 130px; text-align: left !important; padding-left: 16px !important; border-right: 2px solid var(--border-color) !important; font-weight: 700; color: var(--text-main); }
+        th.sticky-col { z-index: 40; background: var(--neutral-soft) !important; }
+        tfoot .sticky-col { z-index: 50 !important; background: var(--neutral-soft) !important; font-weight: 800; }
+
+        .sticky-col-right { position: sticky; right: 0; background: var(--neutral-soft) !important; z-index: 30; min-width: 50px; border-left: 1px solid var(--border-color) !important; font-weight: 800; color: var(--accent); }
+        tfoot .sticky-col-right { z-index: 50 !important; }
+
         .cell-P { background-color: #fdf2f8 !important; color: #db2777 !important; }
         .cell-S { background-color: #fff1f2 !important; color: #e11d48 !important; }
         .cell-M { background-color: #eef2ff !important; color: #4338ca !important; }
@@ -230,7 +244,7 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .btn-floating:active { transform: scale(0.9) rotate(-5deg); }
-        .btn-floating.hidden { display: none; }
+        .btn-floating.hidden { display: none !important; }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -421,7 +435,7 @@
         </div>
 
         <div id="view-rekap" class="view-content">
-            <div class="pink-header p-8 pt-14 pb-12 text-white flex justify-between items-end">
+            <div class="pink-header p-8 pt-14 pb-8 text-white flex justify-between items-end shrink-0">
                 <div>
                     <h2 class="text-xl font-black uppercase tracking-tight">Laporan Kerja 📊</h2>
                     <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest mt-1" id="rekap-period">Memuat Periode...</p>
@@ -431,14 +445,38 @@
                 </button>
             </div>
             
-            <div class="py-6 space-y-4 flex-1 flex flex-col min-h-0">
-                <div class="px-6">
+            <div class="pt-4 pb-2 space-y-3 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div class="px-6 space-y-3 shrink-0">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 mb-1 block">Bulan</label>
+                            <select id="filter-month" onchange="renderRekap()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2.5 px-3 rounded-xl text-[11px] font-bold outline-none dark:text-white">
+                                <option value="0">Januari</option>
+                                <option value="1">Februari</option>
+                                <option value="2">Maret</option>
+                                <option value="3">April</option>
+                                <option value="4">Mei</option>
+                                <option value="5">Juni</option>
+                                <option value="6">Juli</option>
+                                <option value="7">Agustus</option>
+                                <option value="8">September</option>
+                                <option value="9">Oktober</option>
+                                <option value="10">November</option>
+                                <option value="11">Desember</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 mb-1 block">Tahun</label>
+                            <select id="filter-year" onchange="renderRekap()" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2.5 px-3 rounded-xl text-[11px] font-bold outline-none dark:text-white">
+                            </select>
+                        </div>
+                    </div>
                     <div class="relative">
                         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" id="search-rekap" oninput="renderRekap()" placeholder="Cari nama bidan hebat..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-3.5 pl-12 pr-4 rounded-xl text-[11px] font-bold outline-none">
+                        <input type="text" id="search-rekap" oninput="renderRekap()" placeholder="Cari nama bidan hebat..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-3 pl-12 pr-4 rounded-xl text-[11px] font-bold outline-none dark:text-white">
                     </div>
                 </div>
-                <div class="rekap-wrapper" id="rekap-scroll-area">
+                <div class="rekap-wrapper pb-24" id="rekap-scroll-area">
                     <div id="rekap-container"></div>
                 </div>
             </div>
@@ -573,6 +611,25 @@
         isDarkMode: localStorage.getItem('dark_mode') === 'true',
         isOnline: navigator.onLine
     };
+
+    function initFilterDropdowns() {
+        const now = new Date();
+        const selMonth = document.getElementById('filter-month');
+        const selYear = document.getElementById('filter-year');
+        
+        if (selMonth) selMonth.value = now.getMonth();
+        
+        if (selYear && selYear.options.length === 0) {
+            const currentYear = now.getFullYear();
+            for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                selYear.appendChild(opt);
+            }
+        }
+    }
 
     function getLogicalDate(date = new Date()) {
         let d = new Date(date);
@@ -793,6 +850,17 @@
         else { currentEl.classList.add('slide-right-exit'); nextEl.classList.add('slide-right-enter'); }
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         const nav = document.getElementById(`nav-${nextView}`); if(nav) nav.classList.add('active');
+        
+        // KONTROL VISIBILITAS TOMBOL SCAN QR (Hanya tampil di 'home')
+        const floatingBtn = document.getElementById('btn-floating-presence');
+        if (floatingBtn) {
+            if (nextView === 'home' && state.user) {
+                floatingBtn.classList.remove('hidden');
+            } else {
+                floatingBtn.classList.add('hidden');
+            }
+        }
+
         setTimeout(() => {
             currentEl.classList.remove('active', 'slide-left-exit', 'slide-right-exit');
             currentEl.style.display = 'none'; nextEl.classList.remove('slide-left-enter', 'slide-right-enter');
@@ -850,8 +918,17 @@
         document.getElementById('btn-logout').classList.toggle('hidden', !state.user);
         document.getElementById('card-login').classList.toggle('hidden', !!state.user);
         document.getElementById('section-actual').classList.toggle('hidden', !state.user);
+        
+        // Kontrol visibilitas tombol floating Scan
         const floatingBtn = document.getElementById('btn-floating-presence');
-        if(floatingBtn) floatingBtn.classList.toggle('hidden', !state.user);
+        if(floatingBtn) {
+            if (state.user && currentActiveView === 'home') {
+                floatingBtn.classList.remove('hidden');
+            } else {
+                floatingBtn.classList.add('hidden');
+            }
+        }
+
         const userCard = document.getElementById('section-user-card');
         if (state.user) {
             userCard.classList.remove('hidden');
@@ -883,26 +960,47 @@
     }
 
     function renderRekap() {
-        const now = new Date(); const curMo = now.getMonth(); const todayDay = now.getDate();
-        const daysInMo = new Date(now.getFullYear(), curMo + 1, 0).getDate();
+        const now = new Date();
+        const selMonthEl = document.getElementById('filter-month');
+        const selYearEl = document.getElementById('filter-year');
+        
+        const selectedMonth = selMonthEl ? parseInt(selMonthEl.value) : now.getMonth();
+        const selectedYear = selYearEl ? parseInt(selYearEl.value) : now.getFullYear();
+        
+        const daysInMo = new Date(selectedYear, selectedMonth + 1, 0).getDate();
         const query = document.getElementById('search-rekap').value.toLowerCase();
+        
+        const isCurrentMonthAndYear = (selectedMonth === now.getMonth() && selectedYear === now.getFullYear());
+        const todayDay = now.getDate();
+
         let table = `<table class="editor-table"><thead><tr><th class="sticky-col">NAMA BIDAN</th>`;
         for(let d=1; d<=daysInMo; d++) {
-            const classes = `${d === todayDay ? 'today-col' : ''} ${new Date(now.getFullYear(), curMo, d).getDay() === 0 ? 'sunday-col' : ''}`; table += `<th class="${classes}">${d}</th>`;
+            const isToday = isCurrentMonthAndYear && d === todayDay;
+            const isSunday = new Date(selectedYear, selectedMonth, d).getDay() === 0;
+            const classes = `${isToday ? 'today-col' : ''} ${isSunday ? 'sunday-col' : ''}`;
+            table += `<th class="${classes}">${d}</th>`;
         }
         table += `<th class="sticky-col-right">Σ</th></tr></thead><tbody>`;
+        
+        const dailyTotals = new Array(daysInMo + 1).fill(0);
+        let grandTotal = 0;
+
         const filtered = (state.data.officers || []).filter(name => name.toLowerCase().includes(query));
         filtered.forEach(name => {
             let total = 0; table += `<tr class="${state.user === name ? 'my-row' : ''}"><td class="sticky-col uppercase text-[9px]">${name}</td>`;
             for(let d=1; d<=daysInMo; d++) {
                 const dayLogs = (state.data.logs || []).filter(l => { 
                     const p = (l.date || "").split('/'); 
-                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (curMo + 1); 
+                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === (selectedMonth + 1) && (p[2] ? parseInt(p[2]) === selectedYear : true); 
                 });
                 if(dayLogs.length > 0) {
-                    total += dayLogs.length; 
+                    const count = dayLogs.length;
+                    total += count; 
+                    dailyTotals[d] += count;
+                    grandTotal += count;
+
                     const codes = dayLogs.map(l => l.shift[0]).sort().join('+');
-                    const cellClass = dayLogs.length > 1 ? 'cell-multi' : `cell-${codes}`;
+                    const cellClass = count > 1 ? 'cell-multi' : `cell-${codes}`;
                     table += `<td class="${cellClass} font-bold">${codes}</td>`;
                 } else {
                     table += `<td></td>`;
@@ -910,8 +1008,21 @@
             }
             table += `<td class="sticky-col-right font-black">${total}</td></tr>`;
         });
-        document.getElementById('rekap-container').innerHTML = table + `</tbody></table>`;
-        document.getElementById('rekap-period').innerText = `📅 Periode: ${MONTH_NAMES[curMo]} ${now.getFullYear()}`;
+        table += `</tbody>`;
+
+        // Menambahkan Footer Jumlah Jaga per Tanggal
+        table += `<tfoot><tr><td class="sticky-col uppercase text-[9px]">TOTAL JAGA</td>`;
+        for(let d=1; d<=daysInMo; d++) {
+            const isToday = isCurrentMonthAndYear && d === todayDay;
+            const isSunday = new Date(selectedYear, selectedMonth, d).getDay() === 0;
+            const classes = `${isToday ? 'today-col' : ''} ${isSunday ? 'sunday-col' : ''}`;
+            const val = dailyTotals[d] > 0 ? dailyTotals[d] : '';
+            table += `<td class="${classes} font-black text-indigo-600">${val}</td>`;
+        }
+        table += `<td class="sticky-col-right font-black text-indigo-600">${grandTotal}</td></tr></tfoot>`;
+
+        document.getElementById('rekap-container').innerHTML = table + `</table>`;
+        document.getElementById('rekap-period').innerText = `📅 Periode: ${MONTH_NAMES[selectedMonth]} ${selectedYear}`;
     }
 
     function loginUser() {
@@ -955,18 +1066,34 @@
     }
 
     function exportCurrentMonth() {
-        const now = new Date(); const curMo = now.getMonth() + 1;
-        const daysInMo = new Date(now.getFullYear(), curMo, 0).getDate();
+        const selMonthEl = document.getElementById('filter-month');
+        const selYearEl = document.getElementById('filter-year');
+        const now = new Date();
+        
+        const selectedMonth = selMonthEl ? parseInt(selMonthEl.value) : now.getMonth();
+        const selectedYear = selYearEl ? parseInt(selYearEl.value) : now.getFullYear();
+        
+        const curMo = selectedMonth + 1;
+        const daysInMo = new Date(selectedYear, curMo, 0).getDate();
+        
         const header = ["NAMA BIDAN"]; for(let d=1; d<=daysInMo; d++) header.push(d.toString()); header.push("JUMLAH");
+        
+        const dailyTotals = new Array(daysInMo + 1).fill(0);
+        let grandTotal = 0;
+
         const rows = (state.data.officers || []).map(name => {
             let total = 0; const rowData = [name];
             for(let d=1; d<=daysInMo; d++) {
                 const dayLogs = (state.data.logs || []).filter(l => { 
                     const p = (l.date || "").split('/'); 
-                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === curMo; 
+                    return l.name === name && parseInt(p[0]) === d && parseInt(p[1]) === curMo && (p[2] ? parseInt(p[2]) === selectedYear : true); 
                 });
                 if(dayLogs.length > 0) {
-                    total += dayLogs.length;
+                    const count = dayLogs.length;
+                    total += count;
+                    dailyTotals[d] += count;
+                    grandTotal += count;
+
                     const codes = dayLogs.map(l => l.shift[0]).sort().join('+');
                     rowData.push(codes);
                 } else {
@@ -975,12 +1102,20 @@
             }
             rowData.push(total); return rowData;
         });
-        const ws = XLSX.utils.aoa_to_sheet([[`REKAP PRESENSI - ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`], [], header, ...rows]);
+
+        const footerRow = ["TOTAL JAGA"];
+        for(let d=1; d<=daysInMo; d++) {
+            footerRow.push(dailyTotals[d] > 0 ? dailyTotals[d] : '');
+        }
+        footerRow.push(grandTotal);
+
+        const ws = XLSX.utils.aoa_to_sheet([[`REKAP PRESENSI - ${MONTH_NAMES[selectedMonth]} ${selectedYear}`], [], header, ...rows, footerRow]);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-        XLSX.writeFile(wb, `Rekap_SABINA_${MONTH_NAMES[now.getMonth()]}.xlsx`);
+        XLSX.writeFile(wb, `Rekap_SABINA_${MONTH_NAMES[selectedMonth]}_${selectedYear}.xlsx`);
     }
 
     window.onload = () => { 
+        initFilterDropdowns();
         applyDarkMode(); renderAll(); fetchData(true); processQueue(); 
         setInterval(() => renderAll(), 1000); 
         setInterval(() => updateGPS(), 5000); 
